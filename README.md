@@ -42,12 +42,18 @@
 - [OpenAPI Specification](./api/openapi.yaml)
 - Swagger Editor에서 확인: https://editor.swagger.io/
 - 로컬 실행: http://localhost:3000/api-docs
+  <img width="935" height="717" alt="image" src="https://github.com/user-attachments/assets/0b0bb74b-c19c-4936-af5c-eb09d80db0f1" />
+
 
 ### 데이터베이스 설계
 - [ERD (Entity Relationship Diagram)](./docs/erd.md)
+  <img width="1244" height="897" alt="image" src="https://github.com/user-attachments/assets/0271962b-fa3b-4d98-8c4e-058c808293c8" />
+
+
 
 ### 인프라 구성
 - [Infrastructure Diagram](./docs/Infrastructure_Diagram.md)
+<img width="1873" height="746" alt="image" src="https://github.com/user-attachments/assets/34b89be8-5078-4c6d-9a88-8711a86a5628" />
 
 ## 🚀 시작하기
 
