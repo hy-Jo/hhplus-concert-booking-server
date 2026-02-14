@@ -11,10 +11,10 @@ export class ConcertService {
   ) {}
 
   async getAvailableSchedules(concertId: string): Promise<ConcertSchedule[]> {
-    throw new Error('Not implemented');
+    return this.concertRepository.findSchedulesByConcertId(concertId);
   }
 
   async getAvailableSeats(scheduleId: string): Promise<Seat[]> {
-    throw new Error('Not implemented');
+    return this.concertRepository.findAvailableSeats(scheduleId);
   }
 }
