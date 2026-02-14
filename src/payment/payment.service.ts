@@ -3,7 +3,7 @@ import { PaymentRepository } from './payment.repository';
 import { ReservationRepository } from '../reservation/reservation.repository';
 import { PointService } from '../point/point.service';
 import { Payment, PaymentStatus } from './domain/payment.entity';
-import { ReservationStatus } from '../reservation/domain/reservation.entity';
+import { Reservation, ReservationStatus } from '../reservation/domain/reservation.entity';
 
 @Injectable()
 export class PaymentService {
@@ -16,6 +16,24 @@ export class PaymentService {
   ) {}
 
   async processPayment(userId: string, reservationId: string, amount: number): Promise<Payment> {
+    const reservation = await this.findAndValidateReservation(userId, reservationId);
+
+    const payment = new Payment();
+    payment.reservationId = reservationId;
+    payment.userId = userId;
+    payment.amount = amount;
+    payment.status = PaymentStatus.SUCCESS;
+    payment.paidAt = new Date();
+
+    const saved = await this.paymentRepository.save(payment);
+
+    await this.pointService.usePoints(userId, amount, saved.paymentId);
+    await this.reservationRepository.updateStatus(reservationId, ReservationStatus.CONFIRMED);
+
+    return saved;
+  }
+
+  private async findAndValidateReservation(userId: string, reservationId: string): Promise<Reservation> {
     const reservation = await this.reservationRepository.findById(reservationId);
     if (!reservation) {
       throw new NotFoundException('예약을 찾을 수 없습니다.');
@@ -33,18 +51,6 @@ export class PaymentService {
       throw new BadRequestException('예약이 만료되었습니다.');
     }
 
-    const payment = new Payment();
-    payment.reservationId = reservationId;
-    payment.userId = userId;
-    payment.amount = amount;
-    payment.status = PaymentStatus.SUCCESS;
-    payment.paidAt = new Date();
-
-    const saved = await this.paymentRepository.save(payment);
-
-    await this.pointService.usePoints(userId, amount, saved.paymentId);
-    await this.reservationRepository.updateStatus(reservationId, ReservationStatus.CONFIRMED);
-
-    return saved;
+    return reservation;
   }
 }

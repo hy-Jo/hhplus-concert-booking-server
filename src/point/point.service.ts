@@ -24,15 +24,9 @@ export class PointService {
     }
 
     balance.balance = Number(balance.balance) + amount;
-
     const saved = await this.pointRepository.saveBalance(balance);
 
-    const tx = new PointTransaction();
-    tx.userId = userId;
-    tx.txType = PointTxType.CHARGE;
-    tx.amount = amount;
-    tx.balanceAfter = saved.balance;
-    await this.pointRepository.saveTransaction(tx);
+    await this.recordTransaction(userId, PointTxType.CHARGE, amount, saved.balance);
 
     return saved;
   }
@@ -46,10 +40,7 @@ export class PointService {
   }
 
   async usePoints(userId: string, amount: number, paymentId: string): Promise<void> {
-    const balance = await this.pointRepository.findBalanceByUserId(userId);
-    if (!balance) {
-      throw new NotFoundException('유저의 포인트 정보를 찾을 수 없습니다.');
-    }
+    const balance = await this.findBalanceOrThrow(userId);
 
     if (Number(balance.balance) < amount) {
       throw new BadRequestException('포인트 잔액이 부족합니다.');
@@ -58,12 +49,32 @@ export class PointService {
     balance.balance = Number(balance.balance) - amount;
     const saved = await this.pointRepository.saveBalance(balance);
 
+    await this.recordTransaction(userId, PointTxType.PAYMENT, amount, saved.balance, paymentId);
+  }
+
+  private async findBalanceOrThrow(userId: string): Promise<UserPointBalance> {
+    const balance = await this.pointRepository.findBalanceByUserId(userId);
+    if (!balance) {
+      throw new NotFoundException('유저의 포인트 정보를 찾을 수 없습니다.');
+    }
+    return balance;
+  }
+
+  private async recordTransaction(
+    userId: string,
+    txType: PointTxType,
+    amount: number,
+    balanceAfter: number,
+    refPaymentId?: string,
+  ): Promise<void> {
     const tx = new PointTransaction();
     tx.userId = userId;
-    tx.txType = PointTxType.PAYMENT;
+    tx.txType = txType;
     tx.amount = amount;
-    tx.balanceAfter = saved.balance;
-    tx.refPaymentId = paymentId;
+    tx.balanceAfter = balanceAfter;
+    if (refPaymentId) {
+      tx.refPaymentId = refPaymentId;
+    }
     await this.pointRepository.saveTransaction(tx);
   }
 }
