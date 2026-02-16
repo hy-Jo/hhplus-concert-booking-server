@@ -1,18 +1,17 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { QueueToken } from './domain/queue-token.entity';
 import { QueueService } from './queue.service';
-import { QueueRepositoryImpl } from '../infrastructure/persistence/queue/queue.repository.impl';
+import { QueueRepositoryRedisImpl } from '../infrastructure/persistence/queue/queue.repository.redis-impl';
 import { QueueController } from '../interfaces/controllers/queue.controller';
+import { RedisConfigModule } from '../infrastructure/configuration/redis.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([QueueToken])],
+  imports: [RedisConfigModule],
   controllers: [QueueController],
   providers: [
     QueueService,
     {
       provide: 'QueueRepository',
-      useClass: QueueRepositoryImpl,
+      useClass: QueueRepositoryRedisImpl,
     },
   ],
   exports: [QueueService],

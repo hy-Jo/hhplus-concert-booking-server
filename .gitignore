@@ -60,3 +60,6 @@ pnpm-lock.yaml
 # Build files
 *.tsbuildinfo
 .cache
+
+# Claude Code
+.claude/
