@@ -8,9 +8,9 @@ import { Reservation, ReservationStatus } from '../reservation/domain/reservatio
 @Injectable()
 export class PaymentService {
   constructor(
-    @Inject('PaymentRepository')
+    @Inject('PAYMENT_REPOSITORY')
     private readonly paymentRepository: PaymentRepository,
-    @Inject('ReservationRepository')
+    @Inject('RESERVATION_REPOSITORY')
     private readonly reservationRepository: ReservationRepository,
     private readonly pointService: PointService,
   ) {}

@@ -13,7 +13,7 @@ import { PaymentController } from '../interfaces/controllers/payment.controller'
   providers: [
     PaymentService,
     {
-      provide: 'PaymentRepository',
+      provide: 'PAYMENT_REPOSITORY',
       useClass: PaymentRepositoryImpl,
     },
   ],

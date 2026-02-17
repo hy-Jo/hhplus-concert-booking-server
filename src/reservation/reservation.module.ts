@@ -12,10 +12,10 @@ import { ReservationController } from '../interfaces/controllers/reservation.con
   providers: [
     ReservationService,
     {
-      provide: 'ReservationRepository',
+      provide: 'RESERVATION_REPOSITORY',
       useClass: ReservationRepositoryImpl,
     },
   ],
-  exports: [ReservationService, 'ReservationRepository'],
+  exports: [ReservationService, 'RESERVATION_REPOSITORY'],
 })
 export class ReservationModule {}
