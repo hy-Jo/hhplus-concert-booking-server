@@ -194,9 +194,88 @@ CREATE INDEX idx_queue_token_user_issued
 
 ---
 
-## 4. 테이블 재설계 고려사항
+## 4. EXPLAIN 기반 실행계획 검증
 
-### 4-1. `reservation` 테이블 — 이력 분리
+인덱스 제안의 실제 효과를 검증하기 위해 대량 데이터(reservation 10만건, queue_token 5만건, seat 5천건)를 삽입한 후 EXPLAIN 분석을 수행합니다.
+검증 테스트: `test/it/explain-analysis.it.spec.ts`
+
+### 4-1. 검증 절차
+
+```
+1. Testcontainers로 MySQL 8 컨테이너 기동
+2. 대량 샘플 데이터 삽입
+3. 인덱스 없이 EXPLAIN 실행 → type=ALL (Full Table Scan) 확인
+4. 인덱스 생성
+5. 인덱스 적용 후 EXPLAIN 실행 → type 변경, rows 감소 확인
+6. 실제 쿼리 실행시간 측정
+```
+
+### 4-2. 예상 EXPLAIN 결과 비교
+
+#### reservation (seatId, status) — 좌석 예약 중복 확인
+
+| | type | key | rows (추정) |
+|---|---|---|---|
+| **Before** | ALL | NULL | ~100,000 |
+| **After** | ref | idx_reservation_seat_status | < 100 |
+
+- **컬럼 순서 근거**: `seatId`가 카디널리티가 높고(5,000종류), `status`는 4종류로 낮음
+- `seatId`를 선행 컬럼으로 두면 선택도(selectivity)가 높아 탐색 범위를 먼저 좁힘
+- `FOR UPDATE` 락 범위도 인덱스 탐색 결과로 한정되어 락 경합 대폭 감소
+
+#### reservation (status, expiresAt) — 만료 예약 배치 조회
+
+| | type | key | rows (추정) |
+|---|---|---|---|
+| **Before** | ALL | NULL | ~100,000 |
+| **After** | range | idx_reservation_status_expires | < 25,000 |
+
+- **컬럼 순서 근거**: `status = 'HELD'`로 동등 조건 필터 후, `expiresAt <= NOW()` 범위 스캔
+- 동등 조건 컬럼을 선행에 두면 범위 조건이 인덱스 B-Tree를 효율적으로 탐색
+
+#### queue_token (status, expiresAt) — 만료 토큰 + WAITING 카운트
+
+| | type | key | rows (추정) |
+|---|---|---|---|
+| **Before** | ALL | NULL | ~50,000 |
+| **After (만료 토큰)** | range | idx_queue_token_status_expires | < 16,000 |
+| **After (WAITING 카운트)** | ref | idx_queue_token_status_expires | < 16,000 |
+
+- `status`가 선행 컬럼이므로 **leftmost prefix**로 `WHERE status = 'WAITING'` 단독 조회도 커버
+- 하나의 인덱스로 두 가지 쿼리 패턴 모두 해결
+
+#### seat (scheduleId, seatNo) — 좌석 단건 조회
+
+| | type | key | rows (추정) |
+|---|---|---|---|
+| **Before** | ref | FK_scheduleId | ~50 |
+| **After** | const | idx_seat_schedule_no | 1 |
+
+- UNIQUE 복합 인덱스로 단건 조회 시 **const** 접근 (최적)
+- 데이터 무결성도 함께 보장 (동일 스케줄 내 좌석번호 중복 방지)
+
+### 4-3. 인덱스 카디널리티 및 컬럼 순서 정리
+
+| 인덱스 | 선행 컬럼 | 후행 컬럼 | 순서 결정 근거 |
+|--------|----------|----------|---------------|
+| `idx_reservation_seat_status` | `seatId` (높음) | `status` (낮음) | 선택도 높은 컬럼 우선 → 탐색 범위 최소화 |
+| `idx_reservation_status_expires` | `status` (동등) | `expiresAt` (범위) | 동등 조건 선행 → 범위 조건이 B-Tree 순차 탐색 |
+| `idx_queue_token_status_expires` | `status` (동등) | `expiresAt` (범위) | 동등 + 범위 패턴, leftmost prefix로 카운트 쿼리 커버 |
+| `idx_seat_schedule_no` | `scheduleId` | `seatNo` | UNIQUE 제약, ORDER BY seatNo 정렬도 인덱스 처리 |
+
+### 4-4. 쓰기 비용 트레이드오프
+
+| 테이블 | 추가 인덱스 수 | 쓰기 빈도 | 영향 평가 |
+|--------|-------------|----------|----------|
+| `reservation` | +2 | 높음 (예약마다 INSERT) | INSERT 시 인덱스 유지 비용 발생하나, 락 경합 감소 이득이 더 큼 |
+| `queue_token` | +1 | 높음 (토큰 발급마다) | Redis 전환 시 DB는 이력용이므로 영향 미미 |
+| `seat` | +1 | 낮음 (초기 세팅) | 거의 읽기 전용, 쓰기 비용 무시 가능 |
+
+---
+
+## 5. 테이블 재설계 고려사항
+
+### 5-1. `reservation` 테이블 — 이력 분리
 
 현재 `reservation` 테이블에 모든 상태(HELD, CONFIRMED, CANCELLED, EXPIRED)의 데이터가 섞여 있습니다.
 서비스가 성장하면 대부분의 레코드가 EXPIRED/CANCELLED 상태로, 실제 활성 예약(HELD/CONFIRMED) 조회 시 불필요한 데이터를 탐색합니다.
@@ -207,7 +286,7 @@ CREATE INDEX idx_queue_token_user_issued
 
 이렇게 하면 활성 테이블의 크기가 작게 유지되어 비관적 락과 조회 성능 모두 개선됩니다.
 
-### 4-2. `queue_token` 테이블 — Redis 전환 (이미 진행 중)
+### 5-2. `queue_token` 테이블 — Redis 전환 (이미 진행 중)
 
 현재 `QueueRepositoryRedisImpl`로 Redis 기반 구현이 존재합니다.
 대기열은 TTL 기반 만료와 빈번한 카운트 연산이 핵심이므로 Redis Sorted Set이 최적입니다.
