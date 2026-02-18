@@ -164,23 +164,34 @@ CREATE INDEX idx_queue_token_user_issued ON queue_token (userId, issuedAt DESC);
 
 ## 3. 인덱스 적용 요약
 
-### 반드시 추가해야 하는 인덱스 (높음)
+### 3-1. 커버링 인덱스 설계
+
+일반 인덱스는 조건에 맞는 행을 찾은 뒤 **클러스터드 인덱스(PK)로 다시 조회**(Random I/O)합니다.
+커버링 인덱스는 SELECT에 필요한 컬럼까지 인덱스에 포함시켜 **인덱스만으로 결과를 반환**(Extra: `Using index`)합니다.
+
+#### 반드시 추가해야 하는 인덱스 (높음)
 
 ```sql
 -- 1. 좌석 예약 중복 확인 + 비관적 락 최적화
+--    SELECT에서 주로 사용하는 userId, reservationId를 포함하여 커버링 인덱스화
 CREATE INDEX idx_reservation_seat_status
-    ON reservation (seatId, status);
+    ON reservation (seatId, status, reservationId, userId);
 
 -- 2. 만료 예약 배치 조회
+--    배치에서 reservationId를 가져와 상태 업데이트하므로 포함
 CREATE INDEX idx_reservation_status_expires
-    ON reservation (status, expiresAt);
+    ON reservation (status, expiresAt, reservationId);
 
 -- 3. 만료 토큰 배치 조회 + WAITING 카운트
+--    만료 토큰 조회 시 tokenId로 상태 업데이트, 카운트는 SELECT COUNT(*)이므로 추가 컬럼 불필요
 CREATE INDEX idx_queue_token_status_expires
-    ON queue_token (status, expiresAt);
+    ON queue_token (status, expiresAt, tokenId);
 ```
 
-### 추가 권장 인덱스 (중간)
+> **커버링 인덱스 적용 판단 기준**: SELECT 컬럼이 2~3개 이하이고 조회 빈도가 높은 쿼리에만 적용합니다.
+> 포함 컬럼이 많아지면 인덱스 크기가 커져 쓰기 비용이 증가하므로, 모든 컬럼을 포함하는 것은 지양합니다.
+
+#### 추가 권장 인덱스 (중간)
 
 ```sql
 -- 4. 좌석 단건 조회 + 데이터 무결성
@@ -190,6 +201,26 @@ CREATE UNIQUE INDEX idx_seat_schedule_no
 -- 5. 유저별 토큰 조회
 CREATE INDEX idx_queue_token_user_issued
     ON queue_token (userId, issuedAt DESC);
+```
+
+### 3-2. 단계적 롤아웃 계획
+
+인덱스를 한꺼번에 적용하면 테이블 락과 쓰기 성능 저하가 동시에 발생할 수 있습니다.
+우선순위와 영향도를 기준으로 3단계로 나누어 적용합니다.
+
+| 단계 | 인덱스 | 우선순위 근거 | 롤아웃 시점 |
+|------|--------|-------------|-----------|
+| **Phase 1** | `idx_reservation_seat_status` | 동시성 락 경합 해소 — 서비스 안정성 직결 | 즉시 (유휴시간) |
+| **Phase 2** | `idx_reservation_status_expires`, `idx_queue_token_status_expires` | 배치 쿼리 최적화 — 스케줄러 지연 해소 | Phase 1 적용 후 1일 모니터링 뒤 |
+| **Phase 3** | `idx_seat_schedule_no`, `idx_queue_token_user_issued` | 조회 편의 — 긴급도 낮음 | Phase 2 안정 확인 후 |
+
+**각 Phase 적용 절차:**
+```
+1. 유휴시간(새벽)에 ALGORITHM=INPLACE로 온라인 DDL 실행
+2. 적용 직후 EXPLAIN ANALYZE로 실행계획 변경 확인
+3. 슬로우쿼리 로그 임계값 설정 (long_query_time = 0.1s)
+4. 24시간 모니터링: 쿼리 응답시간, INSERT 처리량, 락 대기(innodb_row_lock_waits)
+5. 이상 발견 시 DROP INDEX로 즉시 롤백
 ```
 
 ---
@@ -285,6 +316,42 @@ CREATE INDEX idx_queue_token_user_issued
 - `reservation_history`: EXPIRED, CANCELLED 상태를 이관 (이력 데이터)
 
 이렇게 하면 활성 테이블의 크기가 작게 유지되어 비관적 락과 조회 성능 모두 개선됩니다.
+
+#### 마이그레이션 계획
+
+**Step 1. 이력 테이블 생성**
+```sql
+CREATE TABLE reservation_history LIKE reservation;
+```
+
+**Step 2. 기존 데이터 백필 (배치 이관)**
+```sql
+-- 서비스 영향 최소화를 위해 1만건씩 배치로 이관
+INSERT INTO reservation_history
+  SELECT * FROM reservation
+  WHERE status IN ('EXPIRED', 'CANCELLED')
+  LIMIT 10000;
+
+DELETE FROM reservation
+  WHERE status IN ('EXPIRED', 'CANCELLED')
+  LIMIT 10000;
+
+-- 위 두 쿼리를 데이터가 없을 때까지 반복
+```
+
+**Step 3. 애플리케이션 코드 변경**
+- `findExpiredHeldReservations()` → 만료 처리 후 `reservation_history`로 INSERT + `reservation`에서 DELETE
+- 이력 조회 API가 필요하면 `reservation_history`에서 조회하도록 별도 구현
+
+**Step 4. 자동화 (정기 이관 스케줄러)**
+```
+매일 새벽 3시에 실행:
+1. reservation에서 EXPIRED/CANCELLED 상태인 행을 reservation_history로 이관
+2. 이관 완료된 행을 reservation에서 삭제
+3. 이관 건수 로깅 및 모니터링 알림
+```
+
+**롤백 계획:** `reservation_history`에서 다시 `reservation`으로 INSERT하면 원복 가능. 이력 테이블은 삭제하지 않으므로 데이터 유실 위험 없음.
 
 ### 5-2. `queue_token` 테이블 — Redis 전환 (이미 진행 중)
 
