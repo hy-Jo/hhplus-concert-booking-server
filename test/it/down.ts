@@ -1,8 +1,9 @@
 import { getDatasource } from "./util";
 
 const down = async () => {
-  await global.mysql.stop();
   await (await getDatasource()).destroy();
+  await global.mysql.stop();
+  await global.redis.stop();
 };
 
 export default down;

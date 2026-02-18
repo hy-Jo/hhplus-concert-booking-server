@@ -2,11 +2,12 @@ import { Injectable, Inject, BadRequestException, NotFoundException } from '@nes
 import { PointRepository } from './point.repository';
 import { UserPointBalance } from './domain/user-point-balance.entity';
 import { PointTransaction, PointTxType } from './domain/point-transaction.entity';
+import { DI_TOKENS } from '../common/di-tokens';
 
 @Injectable()
 export class PointService {
   constructor(
-    @Inject('PointRepository')
+    @Inject(DI_TOKENS.POINT_REPOSITORY)
     private readonly pointRepository: PointRepository,
   ) {}
 
