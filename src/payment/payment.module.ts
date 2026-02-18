@@ -6,6 +6,7 @@ import { PaymentRepositoryImpl } from '../infrastructure/persistence/payment/pay
 import { ReservationModule } from '../reservation/reservation.module';
 import { PointModule } from '../point/point.module';
 import { PaymentController } from '../interfaces/controllers/payment.controller';
+import { DI_TOKENS } from '../common/di-tokens';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Payment]), ReservationModule, PointModule],
@@ -13,7 +14,7 @@ import { PaymentController } from '../interfaces/controllers/payment.controller'
   providers: [
     PaymentService,
     {
-      provide: 'PAYMENT_REPOSITORY',
+      provide: DI_TOKENS.PAYMENT_REPOSITORY,
       useClass: PaymentRepositoryImpl,
     },
   ],

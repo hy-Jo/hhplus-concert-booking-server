@@ -2,13 +2,14 @@ import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nest
 import { QueueRepository } from './queue.repository';
 import { QueueToken, QueueTokenStatus } from './domain/queue-token.entity';
 import { randomUUID } from 'crypto';
+import { DI_TOKENS } from '../common/di-tokens';
 
 @Injectable()
 export class QueueService {
   private static readonly TOKEN_TTL_MS = 10 * 60 * 1000;
 
   constructor(
-    @Inject('QueueRepository')
+    @Inject(DI_TOKENS.QUEUE_REPOSITORY)
     private readonly queueRepository: QueueRepository,
   ) {}
 

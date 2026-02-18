@@ -4,13 +4,14 @@ import { ReservationRepository } from '../reservation/reservation.repository';
 import { PointService } from '../point/point.service';
 import { Payment, PaymentStatus } from './domain/payment.entity';
 import { Reservation, ReservationStatus } from '../reservation/domain/reservation.entity';
+import { DI_TOKENS } from '../common/di-tokens';
 
 @Injectable()
 export class PaymentService {
   constructor(
-    @Inject('PAYMENT_REPOSITORY')
+    @Inject(DI_TOKENS.PAYMENT_REPOSITORY)
     private readonly paymentRepository: PaymentRepository,
-    @Inject('RESERVATION_REPOSITORY')
+    @Inject(DI_TOKENS.RESERVATION_REPOSITORY)
     private readonly reservationRepository: ReservationRepository,
     private readonly pointService: PointService,
   ) {}

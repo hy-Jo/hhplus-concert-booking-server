@@ -5,6 +5,7 @@ import { ReservationService } from './reservation.service';
 import { ReservationRepositoryImpl } from '../infrastructure/persistence/reservation/reservation.repository.impl';
 import { ConcertModule } from '../concert/concert.module';
 import { ReservationController } from '../interfaces/controllers/reservation.controller';
+import { DI_TOKENS } from '../common/di-tokens';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Reservation]), ConcertModule],
@@ -12,10 +13,10 @@ import { ReservationController } from '../interfaces/controllers/reservation.con
   providers: [
     ReservationService,
     {
-      provide: 'RESERVATION_REPOSITORY',
+      provide: DI_TOKENS.RESERVATION_REPOSITORY,
       useClass: ReservationRepositoryImpl,
     },
   ],
-  exports: [ReservationService, 'RESERVATION_REPOSITORY'],
+  exports: [ReservationService, DI_TOKENS.RESERVATION_REPOSITORY],
 })
 export class ReservationModule {}

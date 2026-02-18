@@ -4,6 +4,7 @@ import { ReservationRepository } from './reservation.repository';
 import { ConcertRepository } from '../concert/concert.repository';
 import { Reservation, ReservationStatus } from './domain/reservation.entity';
 import { Seat } from '../concert/domain/seat.entity';
+import { DataSource } from 'typeorm';
 
 const createSeat = (overrides: Partial<Seat> = {}): Seat =>
   ({
@@ -18,6 +19,8 @@ describe('ReservationService (Clean Architecture)', () => {
   let service: ReservationService;
   let mockReservationRepository: jest.Mocked<ReservationRepository>;
   let mockConcertRepository: jest.Mocked<ConcertRepository>;
+  let mockManager: { findOne: jest.Mock; save: jest.Mock };
+  let mockDataSource: Partial<DataSource>;
 
   beforeEach(() => {
     mockReservationRepository = {
@@ -34,7 +37,20 @@ describe('ReservationService (Clean Architecture)', () => {
       findSeatByScheduleAndNo: jest.fn(),
     };
 
-    service = new ReservationService(mockReservationRepository, mockConcertRepository);
+    mockManager = {
+      findOne: jest.fn(),
+      save: jest.fn(),
+    };
+
+    mockDataSource = {
+      transaction: jest.fn((cb: any) => cb(mockManager)),
+    };
+
+    service = new ReservationService(
+      mockReservationRepository,
+      mockConcertRepository,
+      mockDataSource as DataSource,
+    );
   });
 
   describe('holdSeat', () => {
@@ -44,16 +60,14 @@ describe('ReservationService (Clean Architecture)', () => {
       // given
       const seat = createSeat();
       mockConcertRepository.findSeatByScheduleAndNo.mockResolvedValue(seat);
-      mockReservationRepository.findBySeatIdAndStatusHeld.mockResolvedValue(null);
-      mockReservationRepository.save.mockResolvedValue({
-        reservationId: 'reservation-1',
-        userId: 'user-1',
-        seatId: seat.seatId,
-        status: ReservationStatus.HELD,
-        heldAt: expect.any(Date),
-        expiresAt: expect.any(Date),
-        createdAt: expect.any(Date),
-      } as Reservation);
+      mockManager.findOne.mockResolvedValue(null);
+      mockManager.save.mockImplementation((reservation) =>
+        Promise.resolve({
+          ...reservation,
+          reservationId: 'reservation-1',
+          createdAt: new Date(),
+        }),
+      );
 
       // when
       const result = await service.holdSeat('user-1', 'schedule-1', 10);
@@ -62,9 +76,9 @@ describe('ReservationService (Clean Architecture)', () => {
       expect(result.status).toBe(ReservationStatus.HELD);
       expect(result.userId).toBe('user-1');
       expect(result.seatId).toBe('seat-10');
-      expect(mockReservationRepository.save).toHaveBeenCalled();
+      expect(mockManager.save).toHaveBeenCalled();
 
-      const savedArg = mockReservationRepository.save.mock.calls[0][0];
+      const savedArg = mockManager.save.mock.calls[0][0];
       const diffMs = savedArg.expiresAt.getTime() - savedArg.heldAt.getTime();
       expect(diffMs).toBe(FIVE_MINUTES_MS);
     });
@@ -83,7 +97,7 @@ describe('ReservationService (Clean Architecture)', () => {
       } as Reservation;
 
       mockConcertRepository.findSeatByScheduleAndNo.mockResolvedValue(seat);
-      mockReservationRepository.findBySeatIdAndStatusHeld.mockResolvedValue(existingReservation);
+      mockManager.findOne.mockResolvedValue(existingReservation);
 
       // when & then
       await expect(

@@ -3,15 +3,16 @@ import { DataSource, In } from 'typeorm';
 import { ReservationRepository } from './reservation.repository';
 import { ConcertRepository } from '../concert/concert.repository';
 import { Reservation, ReservationStatus } from './domain/reservation.entity';
+import { DI_TOKENS } from '../common/di-tokens';
 
 @Injectable()
 export class ReservationService {
   private static readonly HOLD_DURATION_MS = 5 * 60 * 1000;
 
   constructor(
-    @Inject('RESERVATION_REPOSITORY')
+    @Inject(DI_TOKENS.RESERVATION_REPOSITORY)
     private readonly reservationRepository: ReservationRepository,
-    @Inject('ConcertRepository')
+    @Inject(DI_TOKENS.CONCERT_REPOSITORY)
     private readonly concertRepository: ConcertRepository,
     private readonly dataSource: DataSource,
   ) {}
