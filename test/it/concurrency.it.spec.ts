@@ -3,6 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../../src/app.module';
 import { ReservationService } from '../../src/reservation/reservation.service';
+import { ReservationScheduler } from '../../src/reservation/reservation.scheduler';
 import { PointService } from '../../src/point/point.service';
 import { PaymentService } from '../../src/payment/payment.service';
 import { randomUUID } from 'crypto';
@@ -10,6 +11,7 @@ import { randomUUID } from 'crypto';
 describe('동시성 테스트', () => {
   let app: INestApplication;
   let reservationService: ReservationService;
+  let reservationScheduler: ReservationScheduler;
   let pointService: PointService;
   let paymentService: PaymentService;
   let dataSource: DataSource;
@@ -25,6 +27,7 @@ describe('동시성 테스트', () => {
     await app.init();
 
     reservationService = moduleRef.get(ReservationService);
+    reservationScheduler = moduleRef.get(ReservationScheduler);
     pointService = moduleRef.get(PointService);
     paymentService = moduleRef.get(PaymentService);
     dataSource = moduleRef.get(DataSource);
@@ -156,6 +159,91 @@ describe('동시성 테스트', () => {
       // 포인트는 1번만 차감되어야 한다 (100000 - 10000 = 90000)
       const balance = await pointService.getBalance(userId);
       expect(Number(balance.balance)).toBe(90000);
+    });
+  });
+
+  // ──────────────────────────────────────────────
+  // 5. 만료 스케줄러 동시성
+  // ──────────────────────────────────────────────
+  describe('만료 스케줄러 동시성', () => {
+    it('만료된 예약은 스케줄러가 EXPIRED로 전환하고, 이후 같은 좌석을 재예약할 수 있다', async () => {
+      const userA = randomUUID();
+      const userB = randomUUID();
+      const seatNo = 47;
+
+      // User A가 좌석 예약
+      const reservation = await reservationService.holdSeat(userA, SCHEDULE_ID, seatNo);
+      expect(reservation.status).toBe('HELD');
+
+      // expiresAt를 과거로 변경하여 만료 상태 시뮬레이션
+      await dataSource.query(
+        `UPDATE reservation SET expiresAt = NOW() - INTERVAL 1 MINUTE WHERE reservationId = ?`,
+        [reservation.reservationId],
+      );
+
+      // 스케줄러 수동 실행
+      await reservationScheduler.expireHeldReservations();
+
+      // 예약이 EXPIRED로 전환되었는지 확인
+      const rows = await dataSource.query(
+        `SELECT status FROM reservation WHERE reservationId = ?`,
+        [reservation.reservationId],
+      );
+      expect(rows[0].status).toBe('EXPIRED');
+
+      // User B가 같은 좌석을 재예약할 수 있어야 한다
+      const newReservation = await reservationService.holdSeat(userB, SCHEDULE_ID, seatNo);
+      expect(newReservation.userId).toBe(userB);
+      expect(newReservation.status).toBe('HELD');
+    });
+
+    it('만료된 예약에 대해 결제를 시도하면 실패한다', async () => {
+      const userId = randomUUID();
+      const seatNo = 48;
+
+      // 포인트 충전 + 좌석 예약
+      await pointService.chargePoints(userId, 50000);
+      const reservation = await reservationService.holdSeat(userId, SCHEDULE_ID, seatNo);
+
+      // expiresAt를 과거로 변경
+      await dataSource.query(
+        `UPDATE reservation SET expiresAt = NOW() - INTERVAL 1 MINUTE WHERE reservationId = ?`,
+        [reservation.reservationId],
+      );
+
+      // 결제 시도 → 만료로 실패해야 함
+      await expect(
+        paymentService.processPayment(userId, reservation.reservationId, 10000),
+      ).rejects.toThrow('예약이 만료되었습니다.');
+
+      // 포인트는 차감되지 않아야 한다
+      const balance = await pointService.getBalance(userId);
+      expect(Number(balance.balance)).toBe(50000);
+    });
+
+    it('결제와 스케줄러가 동시에 실행되면, 결제가 먼저 락을 잡으면 결제 성공 / 스케줄러는 skip', async () => {
+      const userId = randomUUID();
+      const seatNo = 49;
+
+      // 포인트 충전 + 좌석 예약
+      await pointService.chargePoints(userId, 50000);
+      const reservation = await reservationService.holdSeat(userId, SCHEDULE_ID, seatNo);
+
+      // 결제와 스케줄러를 동시에 실행 (expiresAt가 아직 미래이므로 결제 유효)
+      const [paymentResult, schedulerResult] = await Promise.allSettled([
+        paymentService.processPayment(userId, reservation.reservationId, 10000),
+        reservationScheduler.expireHeldReservations(),
+      ]);
+
+      // 결제는 성공해야 한다
+      expect(paymentResult.status).toBe('fulfilled');
+
+      // 예약 상태가 CONFIRMED인지 확인 (스케줄러의 조건부 UPDATE가 skip됨)
+      const rows = await dataSource.query(
+        `SELECT status FROM reservation WHERE reservationId = ?`,
+        [reservation.reservationId],
+      );
+      expect(rows[0].status).toBe('CONFIRMED');
     });
   });
 });

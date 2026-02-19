@@ -19,34 +19,26 @@ export class PointService {
     }
 
     return this.dataSource.transaction(async (manager) => {
-      let balance = await manager.findOne(UserPointBalance, {
+      // 원자적 UPSERT: 신규 유저는 INSERT, 기존 유저는 balance += amount
+      await manager.query(
+        `INSERT INTO user_point_balance (userId, balance) VALUES (?, ?)
+         ON DUPLICATE KEY UPDATE balance = balance + ?`,
+        [userId, amount, amount],
+      );
+
+      // 업데이트된 잔액 조회
+      const balance = await manager.findOne(UserPointBalance, {
         where: { userId },
-        lock: { mode: 'pessimistic_write' },
       });
-
-      if (!balance) {
-        balance = new UserPointBalance();
-        balance.userId = userId;
-        balance.balance = 0;
-        balance = await manager.save(balance);
-        // 새로 생성한 행에 대해 락을 획득
-        balance = await manager.findOne(UserPointBalance, {
-          where: { userId },
-          lock: { mode: 'pessimistic_write' },
-        });
-      }
-
-      balance.balance = Number(balance.balance) + amount;
-      const saved = await manager.save(balance);
 
       const tx = new PointTransaction();
       tx.userId = userId;
       tx.txType = PointTxType.CHARGE;
       tx.amount = amount;
-      tx.balanceAfter = saved.balance;
+      tx.balanceAfter = balance.balance;
       await manager.save(tx);
 
-      return saved;
+      return balance;
     });
   }
 

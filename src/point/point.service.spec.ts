@@ -15,7 +15,7 @@ const createBalance = (overrides: Partial<UserPointBalance> = {}): UserPointBala
 describe('PointService', () => {
   let service: PointService;
   let mockPointRepository: jest.Mocked<PointRepository>;
-  let mockManager: { findOne: jest.Mock; save: jest.Mock };
+  let mockManager: { findOne: jest.Mock; save: jest.Mock; query: jest.Mock };
   let mockDataSource: Partial<DataSource>;
 
   beforeEach(() => {
@@ -28,6 +28,7 @@ describe('PointService', () => {
     mockManager = {
       findOne: jest.fn(),
       save: jest.fn(),
+      query: jest.fn(),
     };
 
     mockDataSource = {
@@ -40,29 +41,24 @@ describe('PointService', () => {
   describe('chargePoints', () => {
     it('포인트를 정상적으로 충전한다', async () => {
       // given
-      const existing = createBalance({ balance: 5000 });
-      mockManager.findOne.mockResolvedValue(existing);
-      mockManager.save
-        .mockResolvedValueOnce(createBalance({ balance: 15000 })) // saveBalance
-        .mockResolvedValueOnce({} as any); // saveTransaction
+      mockManager.query.mockResolvedValue(undefined);
+      mockManager.findOne.mockResolvedValue(createBalance({ balance: 15000 }));
+      mockManager.save.mockResolvedValueOnce({} as any); // saveTransaction
 
       // when
       const result = await service.chargePoints('user-1', 10000);
 
       // then
       expect(result.balance).toBe(15000);
-      expect(mockManager.save).toHaveBeenCalledTimes(2);
+      expect(mockManager.query).toHaveBeenCalled();
+      expect(mockManager.save).toHaveBeenCalledTimes(1);
     });
 
     it('잔액이 없는 유저에게 포인트를 충전한다 (신규 유저)', async () => {
       // given
-      mockManager.findOne
-        .mockResolvedValueOnce(null) // 첫 조회: 없음
-        .mockResolvedValueOnce(createBalance({ userId: 'new-user', balance: 0 })); // 생성 후 재조회
-      mockManager.save
-        .mockResolvedValueOnce(createBalance({ userId: 'new-user', balance: 0 })) // 초기 생성
-        .mockResolvedValueOnce(createBalance({ userId: 'new-user', balance: 10000 })) // 충전 저장
-        .mockResolvedValueOnce({} as any); // 트랜잭션 기록
+      mockManager.query.mockResolvedValue(undefined);
+      mockManager.findOne.mockResolvedValue(createBalance({ userId: 'new-user', balance: 10000 }));
+      mockManager.save.mockResolvedValueOnce({} as any); // saveTransaction
 
       // when
       const result = await service.chargePoints('new-user', 10000);
