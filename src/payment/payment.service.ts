@@ -1,6 +1,6 @@
 import { Injectable, Inject, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import { PaymentRepository } from './payment.repository';
-import { ReservationRepository } from '../reservation/reservation.repository';
 import { PointService } from '../point/point.service';
 import { Payment, PaymentStatus } from './domain/payment.entity';
 import { Reservation, ReservationStatus } from '../reservation/domain/reservation.entity';
@@ -11,47 +11,46 @@ export class PaymentService {
   constructor(
     @Inject(DI_TOKENS.PAYMENT_REPOSITORY)
     private readonly paymentRepository: PaymentRepository,
-    @Inject(DI_TOKENS.RESERVATION_REPOSITORY)
-    private readonly reservationRepository: ReservationRepository,
     private readonly pointService: PointService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async processPayment(userId: string, reservationId: string, amount: number): Promise<Payment> {
-    const reservation = await this.findAndValidateReservation(userId, reservationId);
+    return this.dataSource.transaction(async (manager) => {
+      // 비관적 락으로 예약 조회 — 스케줄러와의 Race Condition 방지
+      const reservation = await manager.findOne(Reservation, {
+        where: { reservationId },
+        lock: { mode: 'pessimistic_write' },
+      });
 
-    const payment = new Payment();
-    payment.reservationId = reservationId;
-    payment.userId = userId;
-    payment.amount = amount;
-    payment.status = PaymentStatus.SUCCESS;
-    payment.paidAt = new Date();
+      if (!reservation) {
+        throw new NotFoundException('예약을 찾을 수 없습니다.');
+      }
+      if (reservation.userId !== userId) {
+        throw new ForbiddenException('본인의 예약만 결제할 수 있습니다.');
+      }
+      if (reservation.status !== ReservationStatus.HELD) {
+        throw new BadRequestException('HELD 상태의 예약만 결제할 수 있습니다.');
+      }
+      if (new Date() > reservation.expiresAt) {
+        throw new BadRequestException('예약이 만료되었습니다.');
+      }
 
-    const saved = await this.paymentRepository.save(payment);
+      const payment = new Payment();
+      payment.reservationId = reservationId;
+      payment.userId = userId;
+      payment.amount = amount;
+      payment.status = PaymentStatus.SUCCESS;
+      payment.paidAt = new Date();
 
-    await this.pointService.usePoints(userId, amount, saved.paymentId);
-    await this.reservationRepository.updateStatus(reservationId, ReservationStatus.CONFIRMED);
+      const saved = await manager.save(payment);
 
-    return saved;
-  }
+      await this.pointService.usePoints(userId, amount, saved.paymentId);
 
-  private async findAndValidateReservation(userId: string, reservationId: string): Promise<Reservation> {
-    const reservation = await this.reservationRepository.findById(reservationId);
-    if (!reservation) {
-      throw new NotFoundException('예약을 찾을 수 없습니다.');
-    }
+      reservation.status = ReservationStatus.CONFIRMED;
+      await manager.save(reservation);
 
-    if (reservation.userId !== userId) {
-      throw new ForbiddenException('본인의 예약만 결제할 수 있습니다.');
-    }
-
-    if (reservation.status !== ReservationStatus.HELD) {
-      throw new BadRequestException('HELD 상태의 예약만 결제할 수 있습니다.');
-    }
-
-    if (new Date() > reservation.expiresAt) {
-      throw new BadRequestException('예약이 만료되었습니다.');
-    }
-
-    return reservation;
+      return saved;
+    });
   }
 }

@@ -1,4 +1,5 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import { PointService } from './point.service';
 import { PointRepository } from './point.repository';
 import { UserPointBalance } from './domain/user-point-balance.entity';
@@ -14,6 +15,8 @@ const createBalance = (overrides: Partial<UserPointBalance> = {}): UserPointBala
 describe('PointService', () => {
   let service: PointService;
   let mockPointRepository: jest.Mocked<PointRepository>;
+  let mockManager: { findOne: jest.Mock; save: jest.Mock; query: jest.Mock };
+  let mockDataSource: Partial<DataSource>;
 
   beforeEach(() => {
     mockPointRepository = {
@@ -22,30 +25,40 @@ describe('PointService', () => {
       saveTransaction: jest.fn(),
     };
 
-    service = new PointService(mockPointRepository);
+    mockManager = {
+      findOne: jest.fn(),
+      save: jest.fn(),
+      query: jest.fn(),
+    };
+
+    mockDataSource = {
+      transaction: jest.fn((cb: any) => cb(mockManager)),
+    };
+
+    service = new PointService(mockPointRepository, mockDataSource as DataSource);
   });
 
   describe('chargePoints', () => {
     it('포인트를 정상적으로 충전한다', async () => {
       // given
-      mockPointRepository.findBalanceByUserId.mockResolvedValue(createBalance({ balance: 5000 }));
-      mockPointRepository.saveBalance.mockResolvedValue(createBalance({ balance: 15000 }));
-      mockPointRepository.saveTransaction.mockResolvedValue({} as any);
+      mockManager.query.mockResolvedValue(undefined);
+      mockManager.findOne.mockResolvedValue(createBalance({ balance: 15000 }));
+      mockManager.save.mockResolvedValueOnce({} as any); // saveTransaction
 
       // when
       const result = await service.chargePoints('user-1', 10000);
 
       // then
       expect(result.balance).toBe(15000);
-      expect(mockPointRepository.saveBalance).toHaveBeenCalled();
-      expect(mockPointRepository.saveTransaction).toHaveBeenCalled();
+      expect(mockManager.query).toHaveBeenCalled();
+      expect(mockManager.save).toHaveBeenCalledTimes(1);
     });
 
     it('잔액이 없는 유저에게 포인트를 충전한다 (신규 유저)', async () => {
       // given
-      mockPointRepository.findBalanceByUserId.mockResolvedValue(null);
-      mockPointRepository.saveBalance.mockResolvedValue(createBalance({ userId: 'new-user', balance: 10000 }));
-      mockPointRepository.saveTransaction.mockResolvedValue({} as any);
+      mockManager.query.mockResolvedValue(undefined);
+      mockManager.findOne.mockResolvedValue(createBalance({ userId: 'new-user', balance: 10000 }));
+      mockManager.save.mockResolvedValueOnce({} as any); // saveTransaction
 
       // when
       const result = await service.chargePoints('new-user', 10000);
@@ -86,21 +99,21 @@ describe('PointService', () => {
   describe('usePoints', () => {
     it('포인트를 정상적으로 사용(차감)한다', async () => {
       // given
-      mockPointRepository.findBalanceByUserId.mockResolvedValue(createBalance());
-      mockPointRepository.saveBalance.mockResolvedValue(createBalance({ balance: 20000 }));
-      mockPointRepository.saveTransaction.mockResolvedValue({} as any);
+      mockManager.findOne.mockResolvedValue(createBalance());
+      mockManager.save
+        .mockResolvedValueOnce(createBalance({ balance: 20000 })) // saveBalance
+        .mockResolvedValueOnce({} as any); // saveTransaction
 
       // when
       await service.usePoints('user-1', 30000, 'payment-1');
 
       // then
-      expect(mockPointRepository.saveBalance).toHaveBeenCalled();
-      expect(mockPointRepository.saveTransaction).toHaveBeenCalled();
+      expect(mockManager.save).toHaveBeenCalledTimes(2);
     });
 
     it('잔액이 부족하면 BadRequestException을 던진다', async () => {
       // given
-      mockPointRepository.findBalanceByUserId.mockResolvedValue(createBalance({ balance: 1000 }));
+      mockManager.findOne.mockResolvedValue(createBalance({ balance: 1000 }));
 
       // when & then
       await expect(

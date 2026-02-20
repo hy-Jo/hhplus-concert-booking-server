@@ -1,4 +1,5 @@
 import { Injectable, Inject, BadRequestException, NotFoundException } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import { PointRepository } from './point.repository';
 import { UserPointBalance } from './domain/user-point-balance.entity';
 import { PointTransaction, PointTxType } from './domain/point-transaction.entity';
@@ -9,6 +10,7 @@ export class PointService {
   constructor(
     @Inject(DI_TOKENS.POINT_REPOSITORY)
     private readonly pointRepository: PointRepository,
+    private readonly dataSource: DataSource,
   ) {}
 
   async chargePoints(userId: string, amount: number): Promise<UserPointBalance> {
@@ -16,20 +18,28 @@ export class PointService {
       throw new BadRequestException('충전 금액은 0보다 커야 합니다.');
     }
 
-    let balance = await this.pointRepository.findBalanceByUserId(userId);
+    return this.dataSource.transaction(async (manager) => {
+      // 원자적 UPSERT: 신규 유저는 INSERT, 기존 유저는 balance += amount
+      await manager.query(
+        `INSERT INTO user_point_balance (userId, balance) VALUES (?, ?)
+         ON DUPLICATE KEY UPDATE balance = balance + ?`,
+        [userId, amount, amount],
+      );
 
-    if (!balance) {
-      balance = new UserPointBalance();
-      balance.userId = userId;
-      balance.balance = 0;
-    }
+      // 업데이트된 잔액 조회
+      const balance = await manager.findOne(UserPointBalance, {
+        where: { userId },
+      });
 
-    balance.balance = Number(balance.balance) + amount;
-    const saved = await this.pointRepository.saveBalance(balance);
+      const tx = new PointTransaction();
+      tx.userId = userId;
+      tx.txType = PointTxType.CHARGE;
+      tx.amount = amount;
+      tx.balanceAfter = balance.balance;
+      await manager.save(tx);
 
-    await this.recordTransaction(userId, PointTxType.CHARGE, amount, saved.balance);
-
-    return saved;
+      return balance;
+    });
   }
 
   async getBalance(userId: string): Promise<UserPointBalance> {
@@ -41,41 +51,30 @@ export class PointService {
   }
 
   async usePoints(userId: string, amount: number, paymentId: string): Promise<void> {
-    const balance = await this.findBalanceOrThrow(userId);
+    await this.dataSource.transaction(async (manager) => {
+      const balance = await manager.findOne(UserPointBalance, {
+        where: { userId },
+        lock: { mode: 'pessimistic_write' },
+      });
 
-    if (Number(balance.balance) < amount) {
-      throw new BadRequestException('포인트 잔액이 부족합니다.');
-    }
+      if (!balance) {
+        throw new NotFoundException('유저의 포인트 정보를 찾을 수 없습니다.');
+      }
 
-    balance.balance = Number(balance.balance) - amount;
-    const saved = await this.pointRepository.saveBalance(balance);
+      if (Number(balance.balance) < amount) {
+        throw new BadRequestException('포인트 잔액이 부족합니다.');
+      }
 
-    await this.recordTransaction(userId, PointTxType.PAYMENT, amount, saved.balance, paymentId);
-  }
+      balance.balance = Number(balance.balance) - amount;
+      const saved = await manager.save(balance);
 
-  private async findBalanceOrThrow(userId: string): Promise<UserPointBalance> {
-    const balance = await this.pointRepository.findBalanceByUserId(userId);
-    if (!balance) {
-      throw new NotFoundException('유저의 포인트 정보를 찾을 수 없습니다.');
-    }
-    return balance;
-  }
-
-  private async recordTransaction(
-    userId: string,
-    txType: PointTxType,
-    amount: number,
-    balanceAfter: number,
-    refPaymentId?: string,
-  ): Promise<void> {
-    const tx = new PointTransaction();
-    tx.userId = userId;
-    tx.txType = txType;
-    tx.amount = amount;
-    tx.balanceAfter = balanceAfter;
-    if (refPaymentId) {
-      tx.refPaymentId = refPaymentId;
-    }
-    await this.pointRepository.saveTransaction(tx);
+      const tx = new PointTransaction();
+      tx.userId = userId;
+      tx.txType = PointTxType.PAYMENT;
+      tx.amount = amount;
+      tx.balanceAfter = saved.balance;
+      tx.refPaymentId = paymentId;
+      await manager.save(tx);
+    });
   }
 }
