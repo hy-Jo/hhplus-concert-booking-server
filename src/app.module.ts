@@ -7,12 +7,14 @@ import { ReservationModule } from "./reservation/reservation.module";
 import { PaymentModule } from "./payment/payment.module";
 import { PointModule } from "./point/point.module";
 import { DistributedLockModule } from "./infrastructure/distributed-lock/distributed-lock.module";
+import { CacheModule } from "./infrastructure/cache/cache.module";
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     DatabaseModule,
     DistributedLockModule,
+    CacheModule,
     ConcertModule,
     QueueModule,
     ReservationModule,
