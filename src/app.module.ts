@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { ScheduleModule } from "@nestjs/schedule";
 import { DatabaseModule } from "./database/database.module";
 import { ConcertModule } from "./concert/concert.module";
 import { QueueModule } from "./queue/queue.module";
@@ -8,6 +9,7 @@ import { PointModule } from "./point/point.module";
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     DatabaseModule,
     ConcertModule,
     QueueModule,

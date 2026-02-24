@@ -1,7 +1,7 @@
 import { NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import { PaymentService } from './payment.service';
 import { PaymentRepository } from './payment.repository';
-import { ReservationRepository } from '../reservation/reservation.repository';
 import { PointService } from '../point/point.service';
 import { Payment, PaymentStatus } from './domain/payment.entity';
 import { Reservation, ReservationStatus } from '../reservation/domain/reservation.entity';
@@ -21,21 +21,14 @@ const createReservation = (overrides: Partial<Reservation> = {}): Reservation =>
 describe('PaymentService (Clean Architecture)', () => {
   let service: PaymentService;
   let mockPaymentRepository: jest.Mocked<PaymentRepository>;
-  let mockReservationRepository: jest.Mocked<ReservationRepository>;
   let mockPointService: jest.Mocked<PointService>;
+  let mockManager: { findOne: jest.Mock; save: jest.Mock };
+  let mockDataSource: Partial<DataSource>;
 
   beforeEach(() => {
     mockPaymentRepository = {
       save: jest.fn(),
       findByReservationId: jest.fn(),
-    };
-
-    mockReservationRepository = {
-      save: jest.fn(),
-      findById: jest.fn(),
-      findBySeatIdAndStatusHeld: jest.fn(),
-      updateStatus: jest.fn(),
-      findExpiredHeldReservations: jest.fn(),
     };
 
     mockPointService = {
@@ -44,10 +37,19 @@ describe('PaymentService (Clean Architecture)', () => {
       usePoints: jest.fn(),
     } as any;
 
+    mockManager = {
+      findOne: jest.fn(),
+      save: jest.fn(),
+    };
+
+    mockDataSource = {
+      transaction: jest.fn((cb: any) => cb(mockManager)),
+    };
+
     service = new PaymentService(
       mockPaymentRepository,
-      mockReservationRepository,
       mockPointService,
+      mockDataSource as DataSource,
     );
   });
 
@@ -58,17 +60,18 @@ describe('PaymentService (Clean Architecture)', () => {
       const reservationId = 'reservation-1';
       const amount = 50000;
 
-      mockReservationRepository.findById.mockResolvedValue(createReservation());
+      mockManager.findOne.mockResolvedValue(createReservation());
       mockPointService.usePoints.mockResolvedValue(undefined);
-      mockPaymentRepository.save.mockResolvedValue({
-        paymentId: 'payment-1',
-        reservationId,
-        userId,
-        amount,
-        status: PaymentStatus.SUCCESS,
-        paidAt: expect.any(Date),
-        createdAt: expect.any(Date),
-      } as Payment);
+      mockManager.save
+        .mockResolvedValueOnce({
+          paymentId: 'payment-1',
+          reservationId,
+          userId,
+          amount,
+          status: PaymentStatus.SUCCESS,
+          paidAt: expect.any(Date),
+        } as Payment)
+        .mockResolvedValueOnce(createReservation({ status: ReservationStatus.CONFIRMED }));
 
       // when
       const result = await service.processPayment(userId, reservationId, amount);
@@ -76,20 +79,18 @@ describe('PaymentService (Clean Architecture)', () => {
       // then
       expect(result.status).toBe(PaymentStatus.SUCCESS);
       expect(result.amount).toBe(amount);
-      expect(mockPointService.usePoints).toHaveBeenCalledWith(userId, amount, expect.any(String));
-      expect(mockReservationRepository.updateStatus).toHaveBeenCalledWith(
-        reservationId,
-        ReservationStatus.CONFIRMED,
-      );
+      expect(mockPointService.usePoints).toHaveBeenCalledWith(userId, amount, 'payment-1');
+      expect(mockManager.save).toHaveBeenCalledTimes(2);
     });
 
     it('만료된 예약에 대해 결제하면 BadRequestException을 던진다', async () => {
       // given
-      const expiredReservation = createReservation({
-        heldAt: new Date(Date.now() - 10 * 60 * 1000),
-        expiresAt: new Date(Date.now() - 5 * 60 * 1000),
-      });
-      mockReservationRepository.findById.mockResolvedValue(expiredReservation);
+      mockManager.findOne.mockResolvedValue(
+        createReservation({
+          heldAt: new Date(Date.now() - 10 * 60 * 1000),
+          expiresAt: new Date(Date.now() - 5 * 60 * 1000),
+        }),
+      );
 
       // when & then
       await expect(
@@ -99,7 +100,7 @@ describe('PaymentService (Clean Architecture)', () => {
 
     it('존재하지 않는 예약에 대해 결제하면 NotFoundException을 던진다', async () => {
       // given
-      mockReservationRepository.findById.mockResolvedValue(null);
+      mockManager.findOne.mockResolvedValue(null);
 
       // when & then
       await expect(
@@ -109,8 +110,9 @@ describe('PaymentService (Clean Architecture)', () => {
 
     it('이미 CONFIRMED 된 예약에 대해 결제하면 BadRequestException을 던진다', async () => {
       // given
-      const confirmedReservation = createReservation({ status: ReservationStatus.CONFIRMED });
-      mockReservationRepository.findById.mockResolvedValue(confirmedReservation);
+      mockManager.findOne.mockResolvedValue(
+        createReservation({ status: ReservationStatus.CONFIRMED }),
+      );
 
       // when & then
       await expect(
@@ -120,7 +122,7 @@ describe('PaymentService (Clean Architecture)', () => {
 
     it('다른 유저의 예약에 대해 결제하면 ForbiddenException을 던진다', async () => {
       // given
-      mockReservationRepository.findById.mockResolvedValue(createReservation());
+      mockManager.findOne.mockResolvedValue(createReservation());
 
       // when & then
       await expect(

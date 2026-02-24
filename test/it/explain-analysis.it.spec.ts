@@ -20,6 +20,23 @@ describe('EXPLAIN 기반 인덱스 효과 분석', () => {
     dataSource = await getDatasource();
   });
 
+  afterAll(async () => {
+    // 벌크 데이터 및 인덱스 정리 — 다른 테스트에 영향 방지
+    await dataSource.query(`DELETE FROM reservation WHERE userId LIKE 'user-%'`);
+    await dataSource.query(`DELETE FROM seat WHERE scheduleId LIKE 'schedule-bulk-%'`);
+    await dataSource.query(`DELETE FROM concert_schedule WHERE scheduleId LIKE 'schedule-bulk-%'`);
+    await dataSource.query(`DELETE FROM queue_token WHERE userId LIKE 'user-q-%'`);
+    const indexes = [
+      { table: 'reservation', name: 'idx_reservation_seat_status' },
+      { table: 'reservation', name: 'idx_reservation_status_expires' },
+      { table: 'queue_token', name: 'idx_queue_token_status_expires' },
+      { table: 'seat', name: 'idx_seat_schedule_no' },
+    ];
+    for (const { table, name } of indexes) {
+      await dataSource.query(`DROP INDEX ${name} ON ${table}`).catch(() => {});
+    }
+  });
+
   /**
    * EXPLAIN 결과에서 주요 필드를 추출합니다.
    */
@@ -93,7 +110,7 @@ describe('EXPLAIN 기반 인덱스 효과 분석', () => {
       expect(result.type).not.toBe('ALL');
       expect(result.key).toBe('idx_reservation_seat_status');
       // 10만건 중 특정 seatId+status 조합은 수십 건 이내로 줄어야 함
-      expect(result.rows).toBeLessThan(1000);
+      expect(Number(result.rows)).toBeLessThan(1000);
     });
   });
 
@@ -237,7 +254,7 @@ describe('EXPLAIN 기반 인덱스 효과 분석', () => {
       console.log('[AFTER INDEX] seat (scheduleId, seatNo):', result);
 
       expect(result.key).toBe('idx_seat_schedule_no');
-      expect(result.rows).toBeLessThanOrEqual(1);
+      expect(Number(result.rows)).toBeLessThanOrEqual(1);
     });
   });
 

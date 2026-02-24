@@ -37,71 +37,35 @@
 - 좌석 예약과 동시에 해당 좌석은 그 유저에게 약 5분간 임시 배정됩니다. ( 시간은 정책에 따라 자율적으로 정의합니다. )
 - 만약 배정 시간 내에 결제가 완료되지 않는다면 좌석에 대한 임시 배정은 해제되어야 하며 다른 사용자는 예약할 수 있어야 한다.
 
-3️⃣ **`필수`**  **포인트 충전 / 조회 API**
+3️⃣  **포인트 충전 / 조회 API**
 
 - 결제에 사용될 포인트를 API 를 통해 충전하는 API 를 작성합니다.
 - 사용자 식별자 및 충전할 금액을 받아 포인트를 충전합니다.
 - 사용자 식별자를 통해 해당 사용자의 포인트를 조회합니다.
 
-4️⃣ **`필수` 결제 API**
+4️⃣ 결제 API**
 
 - 결제 처리하고 결제 내역을 생성하는 API 를 작성합니다.
 - 결제가 완료되면 해당 좌석의 소유권을 유저에게 배정하고 대기열 토큰을 만료시킵니다.
 
-
-### `필수 과제 **- Integration`**
-
-- Infrastructure Layer 작성 (**“외부 세계와 연결된 모든 것”을 담당하는 계층**)
-    - 예시
-        - **NestJS(TypeScript) 프로젝트 예시 - infrastructure: Adapter (DB, MQ, 외부 API 등)**
-            ```tsx
-            📦 src
-             ┣ 📂 domain
-             ┃ ┣ 📂 order
-             ┃ ┃ ┣ 📄 order.entity.ts
-             ┃ ┃ ┣ 📄 order.repository.ts           <-- 인터페이스
-             ┃ ┣ 📂 product
-             ┃ ┃ ┣ 📄 product.entity.ts
-             ┃ ┃ ┣ 📄 product.repository.ts
-             ┣ 📂 application
-             ┃ ┣ 📂 order
-             ┃ ┃ ┣ 📄 order.service.ts              <-- 유즈케이스
-             ┃ ┃ ┣ 📄 dto/
-             ┣ 📂 infrastructure
-             ┃ ┣ 📂 persistence
-             ┃ ┃ ┣ 📂 order
-             ┃ ┃ ┃ ┣ 📄 order.repository.impl.ts   <-- 실제 구현체 (TypeORM 등)
-             ┃ ┃ ┣ 📂 product
-             ┃ ┃ ┃ ┣ 📄 product.repository.impl.ts
-             ┃ ┣ 📂 external
-             ┃ ┃ ┣ 📄 message-queue.producer.ts
-             ┃ ┃ ┣ 📄 naver-api.client.ts
-             ┃ ┣ 📂 configuration
-             ┃ ┃ ┣ 📄 redis.config.ts
-             ┃ ┃ ┣ 📄 typeorm.config.ts
-             ┣ 📂 interfaces
-             ┃ ┣ 📂 controllers
-             ┃ ┃ ┣ 📄 order.controller.ts         <-- API 계층
-             ┃ ┣ 📂 dto
-             ┃ ┃ ┣ 📄 create-order.dto.ts
-            ```
-
-- 기능별 통합 테스트 작성
-3.  Testcontainers 사용
-- **콘서트 예약 서비스**
-    **1. Infrastructure Layer 구현**
-    - ReservationTokenRepository, SeatReservationRepository, UserBalanceRepository, PaymentRepository 등 구현
-    - 임시 좌석 배정: **Redis 없이도 상태 컬럼 + 만료 시간 방식으로 구현 가능**
-    - 대기열 토큰 관리: Redis 또는 DB 기반으로 구현
-    
-    **2. 기능별 통합 테스트 작성**
-    - 유저가 토큰을 발급받고 → 좌석 예약 요청 → 결제 완료까지의 흐름 테스트
-    - 만료 시간 도래 후 좌석이 다시 예약 가능한지 확인
-    - 다중 유저가 동시에 좌석 요청 시 한 명만 성공하도록 테스트 구성
-
-> `Infrastructure` 는 RDMBS ( MySQL ) 기반으로 작성합니다.
-
-### **`(선택)심화 과제 - DB`**
-- 조회가 오래 걸릴 수 있는 기능을 리스트업하고 분석하여, 테이블 재설계 / 인덱스 등 솔루션을 도출하는 내용의 보고서 작성
-- 주요 기능별 동시성 테스트 작성
-> 이번 과제에서 동시성 테스트는 성공하는 것이 목적이 아니라, 어떤 기능에 대해 동시성 이슈가 예민할지를 미리 리스트업하고 작성하여 Rule 로 가두는 것을 목적으로 합니다.
+### `필수 과제`
+1. Concurrency 
+- 진행중인 시나리오내에서 발생할 수 있는 동시성 이슈를 식별
+- **“콘서트 예약 서비스”**
+    - **예상 동시성 이슈**
+        - 같은 좌석에 대해 동시에 예약 요청 → **중복 예약 발생**
+        - 잔액 차감 중 충돌 발생 → **음수 잔액**
+        - 예약 후 결제 지연 → **임시 배정 해제 로직 부정확**
+    - **구현 및 보고서 요구사항**
+        - 다음 항목 중 2개 이상 구현 및 테스트
+            - 좌석 임시 배정 시 락 제어
+            - 잔액 차감 동시성 제어
+            - 배정 타임아웃 해제 스케줄러 + 테스트
+        - **조건부 UPDATE / SELECT FOR UPDATE / 낙관적 락** 중 하나 이상 사용
+        - **멀티스레드 테스트** 작성
+        - md에 문제 상황, 해결 전략, 테스트 결과를 정리
+        
+1. Finalize
+- 지금까지 구현한 API를 기반으로 **서비스 전체가 실제 운영 환경에서도 안정적으로 동작할 수 있도록 마무리 작업을 수행**합니다.
+- 모든 기능이 **정상 동작**하고, **예외 상황에 유연하게 대응**할 수 있어야 하며, **테스트를 통해 안정성**을 검증해야 합니다.
+- 각 기능에 대해 **테스트 케이스 1개 이상** 작성 필수
