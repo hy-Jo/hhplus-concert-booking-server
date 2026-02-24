@@ -130,7 +130,7 @@ describe('분산락 통합 테스트', () => {
   // ──────────────────────────────────────────────
   describe('좌석 예약 - 분산락 동시성', () => {
     it('10명이 동시에 같은 좌석을 예약하면 1명만 성공한다', async () => {
-      const seatNo = 1;
+      const seatNo = 20;
       const users = Array.from({ length: 10 }, () => randomUUID());
 
       const results = await Promise.allSettled(
@@ -185,7 +185,7 @@ describe('분산락 통합 테스트', () => {
       const userId = randomUUID();
       await pointService.chargePoints(userId, 5000);
 
-      const seatNos = [2, 3, 4, 5, 6];
+      const seatNos = [21, 22, 23, 24, 25];
       const reservations = [];
       for (const seatNo of seatNos) {
         const r = await reservationService.holdSeat(userId, SCHEDULE_ID, seatNo);
@@ -217,7 +217,7 @@ describe('분산락 통합 테스트', () => {
       const userId = randomUUID();
       await pointService.chargePoints(userId, 100000);
 
-      const reservation = await reservationService.holdSeat(userId, SCHEDULE_ID, 7);
+      const reservation = await reservationService.holdSeat(userId, SCHEDULE_ID, 26);
 
       const results = await Promise.allSettled(
         Array.from({ length: 5 }, () =>
