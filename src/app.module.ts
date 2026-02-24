@@ -6,11 +6,13 @@ import { QueueModule } from "./queue/queue.module";
 import { ReservationModule } from "./reservation/reservation.module";
 import { PaymentModule } from "./payment/payment.module";
 import { PointModule } from "./point/point.module";
+import { DistributedLockModule } from "./infrastructure/distributed-lock/distributed-lock.module";
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
     DatabaseModule,
+    DistributedLockModule,
     ConcertModule,
     QueueModule,
     ReservationModule,
