@@ -28,8 +28,10 @@ describe('QueueService', () => {
       findByTokenValue: jest.fn(),
       findByUserId: jest.fn(),
       countWaiting: jest.fn(),
+      countActive: jest.fn(),
       findExpiredTokens: jest.fn(),
       updateStatus: jest.fn(),
+      activateNextTokens: jest.fn(),
     };
 
     service = new QueueService(mockQueueRepository);
@@ -183,6 +185,77 @@ describe('QueueService', () => {
       await expect(
         service.expireToken('invalid'),
       ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('activateTokens', () => {
+    it('ACTIVE 수가 MAX 미만이면 빈 자리만큼 WAITING 토큰을 활성화한다', async () => {
+      // given: 현재 ACTIVE 30개 → 빈 자리 20개
+      mockQueueRepository.countActive.mockResolvedValue(30);
+      mockQueueRepository.activateNextTokens.mockResolvedValue(20);
+
+      // when
+      const activated = await service.activateTokens();
+
+      // then
+      expect(activated).toBe(20);
+      expect(mockQueueRepository.activateNextTokens).toHaveBeenCalledWith(20);
+    });
+
+    it('ACTIVE 수가 MAX에 도달하면 활성화하지 않는다', async () => {
+      // given: 현재 ACTIVE 50개 (MAX)
+      mockQueueRepository.countActive.mockResolvedValue(50);
+
+      // when
+      const activated = await service.activateTokens();
+
+      // then
+      expect(activated).toBe(0);
+      expect(mockQueueRepository.activateNextTokens).not.toHaveBeenCalled();
+    });
+
+    it('WAITING 토큰이 없으면 0을 반환한다', async () => {
+      // given
+      mockQueueRepository.countActive.mockResolvedValue(10);
+      mockQueueRepository.activateNextTokens.mockResolvedValue(0);
+
+      // when
+      const activated = await service.activateTokens();
+
+      // then
+      expect(activated).toBe(0);
+    });
+  });
+
+  describe('cleanupExpiredTokens', () => {
+    it('만료된 토큰을 EXPIRED 상태로 변경한다', async () => {
+      // given
+      const expiredTokens = [
+        createToken({ tokenId: 'token-1', status: QueueTokenStatus.WAITING }),
+        createToken({ tokenId: 'token-2', status: QueueTokenStatus.WAITING }),
+      ];
+      mockQueueRepository.findExpiredTokens.mockResolvedValue(expiredTokens);
+
+      // when
+      const cleaned = await service.cleanupExpiredTokens();
+
+      // then
+      expect(cleaned).toBe(2);
+      expect(mockQueueRepository.updateStatus).toHaveBeenCalledTimes(2);
+      expect(mockQueueRepository.updateStatus).toHaveBeenCalledWith('token-1', QueueTokenStatus.EXPIRED);
+      expect(mockQueueRepository.updateStatus).toHaveBeenCalledWith('token-2', QueueTokenStatus.EXPIRED);
+    });
+
+    it('만료된 토큰이 없으면 0을 반환한다', async () => {
+      // given
+      mockQueueRepository.findExpiredTokens.mockResolvedValue([]);
+
+      // when
+      const cleaned = await service.cleanupExpiredTokens();
+
+      // then
+      expect(cleaned).toBe(0);
+      expect(mockQueueRepository.updateStatus).not.toHaveBeenCalled();
     });
   });
 });
