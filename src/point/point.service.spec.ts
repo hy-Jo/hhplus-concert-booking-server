@@ -35,7 +35,11 @@ describe('PointService', () => {
       transaction: jest.fn((cb: any) => cb(mockManager)),
     };
 
-    service = new PointService(mockPointRepository, mockDataSource as DataSource);
+    const mockDistributedLockService = {
+      withLock: jest.fn((key, callback) => callback()),
+    } as any;
+
+    service = new PointService(mockPointRepository, mockDataSource as DataSource, mockDistributedLockService);
   });
 
   describe('chargePoints', () => {

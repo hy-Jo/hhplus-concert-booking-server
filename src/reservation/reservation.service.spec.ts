@@ -35,6 +35,8 @@ describe('ReservationService (Clean Architecture)', () => {
       findSchedulesByConcertId: jest.fn(),
       findAvailableSeats: jest.fn(),
       findSeatByScheduleAndNo: jest.fn(),
+      findScheduleWithConcert: jest.fn(),
+      findScheduleIdBySeatId: jest.fn(),
     };
 
     mockManager = {
@@ -46,10 +48,15 @@ describe('ReservationService (Clean Architecture)', () => {
       transaction: jest.fn((cb: any) => cb(mockManager)),
     };
 
+    const mockDistributedLockService = {
+      withLock: jest.fn((key, callback) => callback()),
+    } as any;
+
     service = new ReservationService(
       mockReservationRepository,
       mockConcertRepository,
       mockDataSource as DataSource,
+      mockDistributedLockService,
     );
   });
 
