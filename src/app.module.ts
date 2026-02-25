@@ -8,6 +8,7 @@ import { PaymentModule } from "./payment/payment.module";
 import { PointModule } from "./point/point.module";
 import { DistributedLockModule } from "./infrastructure/distributed-lock/distributed-lock.module";
 import { CacheModule } from "./infrastructure/cache/cache.module";
+import { RankingModule } from "./ranking/ranking.module";
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { CacheModule } from "./infrastructure/cache/cache.module";
     ReservationModule,
     PaymentModule,
     PointModule,
+    RankingModule,
   ],
   controllers: [],
   providers: [],
