@@ -6,4 +6,6 @@ export interface ConcertRepository {
   findSchedulesByConcertId(concertId: string): Promise<ConcertSchedule[]>;
   findAvailableSeats(scheduleId: string): Promise<Seat[]>;
   findSeatByScheduleAndNo(scheduleId: string, seatNo: number): Promise<Seat | null>;
+  findScheduleWithConcert(scheduleId: string): Promise<ConcertSchedule | null>;
+  findScheduleIdBySeatId(seatId: string): Promise<string | null>;
 }
