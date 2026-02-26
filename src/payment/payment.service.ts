@@ -1,31 +1,29 @@
 import { Injectable, Inject, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PaymentRepository } from './payment.repository';
 import { PointService } from '../point/point.service';
 import { Payment, PaymentStatus } from './domain/payment.entity';
 import { Reservation, ReservationStatus } from '../reservation/domain/reservation.entity';
 import { DI_TOKENS } from '../common/di-tokens';
 import { DistributedLockService } from '../infrastructure/distributed-lock/distributed-lock.service';
-import { RankingService } from '../ranking/ranking.service';
-import { ConcertRepository } from '../concert/concert.repository';
+import { PaymentCompletedEvent } from './events/payment-completed.event';
 
 @Injectable()
 export class PaymentService {
   constructor(
     @Inject(DI_TOKENS.PAYMENT_REPOSITORY)
     private readonly paymentRepository: PaymentRepository,
-    @Inject(DI_TOKENS.CONCERT_REPOSITORY)
-    private readonly concertRepository: ConcertRepository,
     private readonly pointService: PointService,
-    private readonly rankingService: RankingService,
     private readonly dataSource: DataSource,
     private readonly distributedLockService: DistributedLockService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async processPayment(userId: string, reservationId: string, amount: number): Promise<Payment> {
     // 분산락: 같은 예약에 대한 중복 결제 방지
     // 키: reservation:{reservationId} — 예약 단위로 락을 걸어 동일 예약의 동시 결제 차단
-    return this.distributedLockService.withLock(
+    const { payment, seatId } = await this.distributedLockService.withLock(
       `reservation:${reservationId}`,
       async () => {
         return this.dataSource.transaction(async (manager) => {
@@ -46,33 +44,31 @@ export class PaymentService {
             throw new BadRequestException('예약이 만료되었습니다.');
           }
 
-          const payment = new Payment();
-          payment.reservationId = reservationId;
-          payment.userId = userId;
-          payment.amount = amount;
-          payment.status = PaymentStatus.SUCCESS;
-          payment.paidAt = new Date();
+          const newPayment = new Payment();
+          newPayment.reservationId = reservationId;
+          newPayment.userId = userId;
+          newPayment.amount = amount;
+          newPayment.status = PaymentStatus.SUCCESS;
+          newPayment.paidAt = new Date();
 
-          const saved = await manager.save(payment);
+          const saved = await manager.save(newPayment);
 
           await this.pointService.usePoints(userId, amount, saved.paymentId);
 
           reservation.status = ReservationStatus.CONFIRMED;
           await manager.save(reservation);
 
-          // 랭킹 갱신 (트랜잭션 외부에서 비동기 처리 — 실패해도 결제에 영향 없음)
-          this.updateRanking(reservation.seatId).catch(() => {});
-
-          return saved;
+          return { payment: saved, seatId: reservation.seatId };
         });
       },
     );
-  }
 
-  private async updateRanking(seatId: string): Promise<void> {
-    const scheduleId = await this.concertRepository.findScheduleIdBySeatId(seatId);
-    if (scheduleId) {
-      await this.rankingService.onReservationConfirmed(scheduleId);
-    }
+    // 트랜잭션 완료 후 이벤트 발행 — 관심사 분리
+    this.eventEmitter.emit(
+      PaymentCompletedEvent.EVENT_NAME,
+      new PaymentCompletedEvent(payment.paymentId, userId, reservationId, seatId, amount),
+    );
+
+    return payment;
   }
 }
