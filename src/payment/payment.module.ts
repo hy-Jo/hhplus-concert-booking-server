@@ -6,14 +6,17 @@ import { PaymentRepositoryImpl } from '../infrastructure/persistence/payment/pay
 import { PointModule } from '../point/point.module';
 import { RankingModule } from '../ranking/ranking.module';
 import { ConcertModule } from '../concert/concert.module';
+import { DataPlatformModule } from '../infrastructure/data-platform/data-platform.module';
 import { PaymentController } from '../interfaces/controllers/payment.controller';
+import { PaymentEventHandler } from './events/payment-event.handler';
 import { DI_TOKENS } from '../common/di-tokens';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Payment]), PointModule, RankingModule, ConcertModule],
+  imports: [TypeOrmModule.forFeature([Payment]), PointModule, RankingModule, ConcertModule, DataPlatformModule],
   controllers: [PaymentController],
   providers: [
     PaymentService,
+    PaymentEventHandler,
     {
       provide: DI_TOKENS.PAYMENT_REPOSITORY,
       useClass: PaymentRepositoryImpl,

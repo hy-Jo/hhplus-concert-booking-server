@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ScheduleModule } from "@nestjs/schedule";
+import { EventEmitterModule } from "@nestjs/event-emitter";
 import { DatabaseModule } from "./database/database.module";
 import { ConcertModule } from "./concert/concert.module";
 import { QueueModule } from "./queue/queue.module";
@@ -13,6 +14,7 @@ import { RankingModule } from "./ranking/ranking.module";
 @Module({
   imports: [
     ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
     DatabaseModule,
     DistributedLockModule,
     CacheModule,
