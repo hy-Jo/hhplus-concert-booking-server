@@ -12,9 +12,15 @@ describe('ConcertService', () => {
       findSchedulesByConcertId: jest.fn(),
       findAvailableSeats: jest.fn(),
       findSeatByScheduleAndNo: jest.fn(),
+      findScheduleWithConcert: jest.fn(),
+      findScheduleIdBySeatId: jest.fn(),
     };
 
-    service = new ConcertService(mockConcertRepository);
+    const mockCacheService = {
+      getOrLoad: jest.fn((key, loader) => loader()),
+    } as any;
+
+    service = new ConcertService(mockConcertRepository, mockCacheService);
   });
 
   describe('getAvailableSchedules', () => {

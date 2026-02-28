@@ -46,10 +46,29 @@ describe('PaymentService (Clean Architecture)', () => {
       transaction: jest.fn((cb: any) => cb(mockManager)),
     };
 
+    const mockConcertRepository = {
+      findSchedulesByConcertId: jest.fn(),
+      findAvailableSeats: jest.fn(),
+      findSeatByScheduleAndNo: jest.fn(),
+      findScheduleWithConcert: jest.fn(),
+      findScheduleIdBySeatId: jest.fn(),
+    } as any;
+
+    const mockRankingService = {
+      onReservationConfirmed: jest.fn().mockResolvedValue(undefined),
+    } as any;
+
+    const mockDistributedLockService = {
+      withLock: jest.fn((key, callback) => callback()),
+    } as any;
+
     service = new PaymentService(
       mockPaymentRepository,
+      mockConcertRepository,
       mockPointService,
+      mockRankingService,
       mockDataSource as DataSource,
+      mockDistributedLockService,
     );
   });
 

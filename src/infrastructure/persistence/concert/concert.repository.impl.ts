@@ -33,4 +33,16 @@ export class ConcertRepositoryImpl implements ConcertRepository {
       where: { scheduleId, seatNo },
     });
   }
+
+  async findScheduleWithConcert(scheduleId: string): Promise<ConcertSchedule | null> {
+    return this.scheduleRepo.findOne({
+      where: { scheduleId },
+      relations: ['concert'],
+    });
+  }
+
+  async findScheduleIdBySeatId(seatId: string): Promise<string | null> {
+    const seat = await this.seatRepo.findOne({ where: { seatId } });
+    return seat?.scheduleId ?? null;
+  }
 }

@@ -6,13 +6,18 @@ import { Payment, PaymentStatus } from './domain/payment.entity';
 import { Reservation, ReservationStatus } from '../reservation/domain/reservation.entity';
 import { DI_TOKENS } from '../common/di-tokens';
 import { DistributedLockService } from '../infrastructure/distributed-lock/distributed-lock.service';
+import { RankingService } from '../ranking/ranking.service';
+import { ConcertRepository } from '../concert/concert.repository';
 
 @Injectable()
 export class PaymentService {
   constructor(
     @Inject(DI_TOKENS.PAYMENT_REPOSITORY)
     private readonly paymentRepository: PaymentRepository,
+    @Inject(DI_TOKENS.CONCERT_REPOSITORY)
+    private readonly concertRepository: ConcertRepository,
     private readonly pointService: PointService,
+    private readonly rankingService: RankingService,
     private readonly dataSource: DataSource,
     private readonly distributedLockService: DistributedLockService,
   ) {}
@@ -55,9 +60,19 @@ export class PaymentService {
           reservation.status = ReservationStatus.CONFIRMED;
           await manager.save(reservation);
 
+          // 랭킹 갱신 (트랜잭션 외부에서 비동기 처리 — 실패해도 결제에 영향 없음)
+          this.updateRanking(reservation.seatId).catch(() => {});
+
           return saved;
         });
       },
     );
+  }
+
+  private async updateRanking(seatId: string): Promise<void> {
+    const scheduleId = await this.concertRepository.findScheduleIdBySeatId(seatId);
+    if (scheduleId) {
+      await this.rankingService.onReservationConfirmed(scheduleId);
+    }
   }
 }
