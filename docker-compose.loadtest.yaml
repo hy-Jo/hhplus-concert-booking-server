@@ -18,9 +18,9 @@ services:
       NODE_ENV: production
       DB_HOST: mysql
       DB_PORT: 3306
-      DB_USER: root
+      DB_USERNAME: root
       DB_PASSWORD: password
-      DB_NAME: concert_db
+      DB_DATABASE: concert_db
       REDIS_HOST: redis
       REDIS_PORT: 6379
       KAFKA_BROKERS: broker1:29092,broker2:29092,broker3:29092
@@ -61,9 +61,9 @@ services:
       NODE_ENV: production
       DB_HOST: mysql
       DB_PORT: 3306
-      DB_USER: root
+      DB_USERNAME: root
       DB_PASSWORD: password
-      DB_NAME: concert_db
+      DB_DATABASE: concert_db
       REDIS_HOST: redis
       REDIS_PORT: 6379
       KAFKA_BROKERS: broker1:29092,broker2:29092,broker3:29092
@@ -104,9 +104,9 @@ services:
       NODE_ENV: production
       DB_HOST: mysql
       DB_PORT: 3306
-      DB_USER: root
+      DB_USERNAME: root
       DB_PASSWORD: password
-      DB_NAME: concert_db
+      DB_DATABASE: concert_db
       REDIS_HOST: redis
       REDIS_PORT: 6379
       KAFKA_BROKERS: broker1:29092,broker2:29092,broker3:29092
@@ -140,7 +140,7 @@ services:
     image: mysql:8.0
     container_name: concert-mysql
     ports:
-      - "3306:3306"
+      - "3308:3306"
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: concert_db
@@ -191,7 +191,7 @@ services:
   # Kafka Cluster (3 Brokers)
   # ==============================================
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
+    image: confluentinc/cp-zookeeper:7.6.0
     container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -202,7 +202,7 @@ services:
       - loadtest-network
 
   broker1:
-    image: confluentinc/cp-kafka:7.5.0
+    image: confluentinc/cp-kafka:7.6.0
     container_name: broker1
     depends_on:
       - zookeeper
@@ -221,7 +221,7 @@ services:
       - loadtest-network
 
   broker2:
-    image: confluentinc/cp-kafka:7.5.0
+    image: confluentinc/cp-kafka:7.6.0
     container_name: broker2
     depends_on:
       - zookeeper
@@ -240,7 +240,7 @@ services:
       - loadtest-network
 
   broker3:
-    image: confluentinc/cp-kafka:7.5.0
+    image: confluentinc/cp-kafka:7.6.0
     container_name: broker3
     depends_on:
       - zookeeper
