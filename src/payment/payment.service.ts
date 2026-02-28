@@ -8,6 +8,7 @@ import { Reservation, ReservationStatus } from '../reservation/domain/reservatio
 import { DI_TOKENS } from '../common/di-tokens';
 import { DistributedLockService } from '../infrastructure/distributed-lock/distributed-lock.service';
 import { PaymentCompletedEvent } from './events/payment-completed.event';
+import { KafkaProducerService } from '../infrastructure/kafka/kafka.producer.service';
 
 @Injectable()
 export class PaymentService {
@@ -18,6 +19,7 @@ export class PaymentService {
     private readonly dataSource: DataSource,
     private readonly distributedLockService: DistributedLockService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly kafkaProducer: KafkaProducerService,
   ) {}
 
   async processPayment(userId: string, reservationId: string, amount: number): Promise<Payment> {
@@ -64,6 +66,16 @@ export class PaymentService {
     );
 
     // 트랜잭션 완료 후 이벤트 발행 — 관심사 분리
+    // Kafka를 통해 이벤트 발행 (EventEmitter → Kafka 전환)
+    await this.kafkaProducer.sendPaymentCompletedEvent({
+      paymentId: payment.paymentId,
+      userId,
+      reservationId,
+      seatId,
+      amount,
+    });
+
+    // 기존 EventEmitter는 당분간 유지 (하위 호환성)
     this.eventEmitter.emit(
       PaymentCompletedEvent.EVENT_NAME,
       new PaymentCompletedEvent(payment.paymentId, userId, reservationId, seatId, amount),

@@ -10,9 +10,10 @@ import { DataPlatformModule } from '../infrastructure/data-platform/data-platfor
 import { PaymentController } from '../interfaces/controllers/payment.controller';
 import { PaymentEventHandler } from './events/payment-event.handler';
 import { DI_TOKENS } from '../common/di-tokens';
+import { KafkaModule } from '../infrastructure/kafka/kafka.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Payment]), PointModule, RankingModule, ConcertModule, DataPlatformModule],
+  imports: [TypeOrmModule.forFeature([Payment]), PointModule, RankingModule, ConcertModule, DataPlatformModule, KafkaModule],
   controllers: [PaymentController],
   providers: [
     PaymentService,
