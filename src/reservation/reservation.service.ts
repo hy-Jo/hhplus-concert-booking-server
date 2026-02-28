@@ -5,6 +5,7 @@ import { ConcertRepository } from '../concert/concert.repository';
 import { Reservation, ReservationStatus } from './domain/reservation.entity';
 import { DI_TOKENS } from '../common/di-tokens';
 import { DistributedLockService } from '../infrastructure/distributed-lock/distributed-lock.service';
+import { KafkaProducerService } from '../infrastructure/kafka/kafka.producer.service';
 
 @Injectable()
 export class ReservationService {
@@ -17,6 +18,7 @@ export class ReservationService {
     private readonly concertRepository: ConcertRepository,
     private readonly dataSource: DataSource,
     private readonly distributedLockService: DistributedLockService,
+    private readonly kafkaProducer: KafkaProducerService,
   ) {}
 
   async holdSeat(userId: string, scheduleId: string, seatNo: number): Promise<Reservation> {
@@ -27,7 +29,7 @@ export class ReservationService {
 
     // 분산락: 같은 좌석에 대한 동시 예약 방지
     // 키: seat:{seatId} — 좌석 단위로 락을 걸어 최소한의 범위로 동시성 제어
-    return this.distributedLockService.withLock(
+    const reservation = await this.distributedLockService.withLock(
       `seat:${seat.seatId}`,
       async () => {
         return this.dataSource.transaction(async (manager) => {
@@ -54,5 +56,28 @@ export class ReservationService {
         });
       },
     );
+
+    // 트랜잭션 완료 후 Kafka 이벤트 발행 (예약 만료 처리)
+    await this.kafkaProducer.sendReservationExpirationEvent({
+      reservationId: reservation.reservationId,
+      userId: reservation.userId,
+      seatId: reservation.seatId,
+      expiresAt: reservation.expiresAt,
+    });
+
+    return reservation;
+  }
+
+  /**
+   * 예약을 만료 처리합니다 (Kafka Consumer에서 호출)
+   * 조건부 UPDATE로 멱등성 보장: HELD 상태인 경우만 EXPIRED로 변경
+   */
+  async expireReservation(reservationId: string): Promise<boolean> {
+    const result = await this.dataSource.query(
+      `UPDATE reservation SET status = ? WHERE reservationId = ? AND status = ?`,
+      [ReservationStatus.EXPIRED, reservationId, ReservationStatus.HELD],
+    );
+
+    return result.affectedRows > 0;
   }
 }

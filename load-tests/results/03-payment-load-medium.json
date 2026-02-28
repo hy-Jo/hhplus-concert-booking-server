@@ -1,0 +1,407 @@
+{
+  "state": {
+    "isStdOutTTY": false,
+    "isStdErrTTY": false,
+    "testRunDurationMs": 142802.671135
+  },
+  "metrics": {
+    "http_req_duration": {
+      "thresholds": {
+        "p(95)<800": {
+          "ok": true
+        }
+      },
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(90)": 6.696457600000001,
+        "p(95)": 18.7723931,
+        "avg": 5.634115005494511,
+        "min": 1.761981,
+        "med": 4.1030685,
+        "max": 62.053727
+      }
+    },
+    "iteration_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 5353.707804014116,
+        "min": 3311.498385,
+        "med": 5415.822552,
+        "max": 7322.220574,
+        "p(90)": 6875.560339000001,
+        "p(95)": 7105.9712329999975
+      }
+    },
+    "http_req_sending": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(90)": 0.10452920000000002,
+        "p(95)": 0.12349014999999995,
+        "avg": 0.06755100769230772,
+        "min": 0.009508,
+        "med": 0.0628385,
+        "max": 1.362023
+      }
+    },
+    "payment_failed": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 405,
+        "rate": 2.836081403667366
+      }
+    },
+    "http_req_tls_handshaking": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 0,
+        "min": 0,
+        "med": 0,
+        "max": 0,
+        "p(90)": 0,
+        "p(95)": 0
+      }
+    },
+    "vus": {
+      "values": {
+        "min": 0,
+        "max": 20,
+        "value": 1
+      },
+      "type": "gauge",
+      "contains": "default"
+    },
+    "http_req_connecting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 0.3559318,
+        "avg": 0.04810857142857144,
+        "min": 0,
+        "med": 0,
+        "max": 0.990732,
+        "p(90)": 0.28923810000000005
+      }
+    },
+    "http_req_receiving": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 0.38541,
+        "p(90)": 0.196277,
+        "p(95)": 0.22564404999999998,
+        "avg": 0.1411949461538462,
+        "min": 0.055169,
+        "med": 0.131062
+      }
+    },
+    "payment_success": {
+      "contains": "default",
+      "values": {
+        "count": 20,
+        "rate": 0.14005340265024027
+      },
+      "type": "counter"
+    },
+    "iterations": {
+      "contains": "default",
+      "values": {
+        "count": 425,
+        "rate": 2.976134806317606
+      },
+      "type": "counter"
+    },
+    "errors": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 425
+      },
+      "thresholds": {
+        "rate<0.02": {
+          "ok": true
+        }
+      }
+    },
+    "http_req_waiting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 61.738407,
+        "p(90)": 6.4496768000000015,
+        "p(95)": 18.50546785,
+        "avg": 5.4253690516483575,
+        "min": 1.591114,
+        "med": 3.9104590000000004
+      }
+    },
+    "http_req_blocked": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 0.49952759999999996,
+        "avg": 0.07698551428571432,
+        "min": 0.003377,
+        "med": 0.008171,
+        "max": 3.12383,
+        "p(90)": 0.4068151
+      }
+    },
+    "data_sent": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 165267,
+        "rate": 1157.310284789863
+      }
+    },
+    "data_received": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 308841,
+        "rate": 2162.711646395143
+      }
+    },
+    "checks": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 1,
+        "passes": 1275,
+        "fails": 0
+      }
+    },
+    "group_duration": {
+      "contains": "time",
+      "values": {
+        "p(95)": 315.52144979999997,
+        "avg": 311.1266827882354,
+        "min": 306.844248,
+        "med": 308.956859,
+        "max": 360.312347,
+        "p(90)": 311.6688332
+      },
+      "type": "trend"
+    },
+    "vus_max": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 20,
+        "min": 20,
+        "max": 20
+      }
+    },
+    "http_req_failed": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0.44505494505494503,
+        "passes": 405,
+        "fails": 505
+      },
+      "thresholds": {
+        "rate<0.02": {
+          "ok": false
+        }
+      }
+    },
+    "payment_duration": {
+      "type": "trend",
+      "contains": "default",
+      "values": {
+        "max": 56,
+        "p(90)": 7,
+        "p(95)": 10.799999999999955,
+        "avg": 7.315294117647059,
+        "min": 4,
+        "med": 5
+      },
+      "thresholds": {
+        "p(99)<1500": {
+          "ok": true
+        }
+      }
+    },
+    "http_reqs": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 910,
+        "rate": 6.372429820585933
+      }
+    },
+    "http_req_duration{expected_response:true}": {
+      "contains": "time",
+      "values": {
+        "avg": 6.020506683168307,
+        "min": 1.761981,
+        "med": 2.582589,
+        "max": 62.053727,
+        "p(90)": 17.958053200000005,
+        "p(95)": 28.574463199999983
+      },
+      "type": "trend"
+    }
+  },
+  "setup_data": {
+    "reservations": [
+      {
+        "reservationId": "1e79ddfe-75ea-4ca6-99f8-bb47567f27d4",
+        "token": "1379e6dd-4ae7-44f3-b390-1d1985867ecf",
+        "userId": "payment_user_1"
+      },
+      {
+        "reservationId": "9f306392-0d26-4a67-a6bf-0c3e8d2a7bad",
+        "token": "0e2f9473-7fec-4262-8c1a-ef183aa79040",
+        "userId": "payment_user_2"
+      },
+      {
+        "userId": "payment_user_3",
+        "reservationId": "513380af-29f5-4642-9766-4fe7f2a1e23d",
+        "token": "843f5d13-8228-4a41-9be2-aa1d4b17a374"
+      },
+      {
+        "reservationId": "63fe89ea-ba72-48e4-8dcd-fcdb2b8a829f",
+        "token": "51191c13-8082-4d00-b455-0bb557715991",
+        "userId": "payment_user_4"
+      },
+      {
+        "reservationId": "3174d272-79ce-41c9-910f-475fe02f83b5",
+        "token": "42203eaf-8257-43a2-8ee3-f79a1ac46dc8",
+        "userId": "payment_user_5"
+      },
+      {
+        "reservationId": "e6ba6344-e8ea-4080-a447-0ba4ef5d348a",
+        "token": "b5ca7d69-c091-43a2-b0e7-1bba3f0ee305",
+        "userId": "payment_user_6"
+      },
+      {
+        "reservationId": "c3f599fc-6bf4-4518-8c22-a15a3ccf6c45",
+        "token": "411b8a9b-c4fa-4502-bba5-153effbecc28",
+        "userId": "payment_user_7"
+      },
+      {
+        "userId": "payment_user_8",
+        "reservationId": "284844ba-f407-4a81-b937-c47e198f5b7d",
+        "token": "56c21cbc-5c38-4f7a-bcfb-30aa416e5f65"
+      },
+      {
+        "userId": "payment_user_9",
+        "reservationId": "695d93fc-590c-4b70-b7eb-9fa145854131",
+        "token": "9459b328-3634-4c9f-bf62-5bcbd7879e28"
+      },
+      {
+        "token": "32e15ee5-a9bd-4de8-9c94-0a66415f176e",
+        "userId": "payment_user_10",
+        "reservationId": "669fa6e1-ba77-4c5c-99a0-5d6db1e3029d"
+      },
+      {
+        "reservationId": "435283b6-1832-4d69-b21a-10b84659b02a",
+        "token": "4348f5a2-5c13-4bb4-940c-12c4ec75a67e",
+        "userId": "payment_user_11"
+      },
+      {
+        "reservationId": "485d54d9-f43d-470c-8b10-deacec9197a3",
+        "token": "2b0bfe2f-c6b0-44eb-b180-cb07d0f29567",
+        "userId": "payment_user_12"
+      },
+      {
+        "token": "a8cc4188-b38c-4d99-8379-f2f5890898ec",
+        "userId": "payment_user_13",
+        "reservationId": "403e5cf9-4053-447b-993d-df68c9123348"
+      },
+      {
+        "reservationId": "c50dceef-4348-46a8-9afb-cd2d5d368617",
+        "token": "2e9b8f30-e697-4938-b3e0-536ef10bc66e",
+        "userId": "payment_user_14"
+      },
+      {
+        "userId": "payment_user_15",
+        "reservationId": "0b4582bf-d734-4d1e-9e6c-f269d6b300ec",
+        "token": "ca1fed7e-da91-479d-afd0-f3c8e3a85689"
+      },
+      {
+        "reservationId": "44b1bee1-7b1c-4456-940d-7b64adc67f8c",
+        "token": "b510d880-c391-49f1-8bdf-6ed93030f6b2",
+        "userId": "payment_user_16"
+      },
+      {
+        "reservationId": "b3a05e6b-9019-49af-abab-2ceef74cd5e7",
+        "token": "4e8066bf-421f-4d32-a5a5-721bbeabd9d0",
+        "userId": "payment_user_17"
+      },
+      {
+        "reservationId": "0b25843b-8b22-4f9c-8945-3c6b9b0afc8b",
+        "token": "06eca3ac-87ee-41dc-a58c-9281e2cf60d1",
+        "userId": "payment_user_18"
+      },
+      {
+        "reservationId": "582eddf5-6188-4a77-9930-7f521861a0af",
+        "token": "3caeb4d5-5925-4b5e-b910-fdbf5ef323db",
+        "userId": "payment_user_19"
+      },
+      {
+        "reservationId": "86d70261-e77a-4f35-994e-c3fbcd652b9d",
+        "token": "8a1499a2-cdc2-4367-a495-bea115273b54",
+        "userId": "payment_user_20"
+      }
+    ]
+  },
+  "root_group": {
+    "path": "",
+    "id": "d41d8cd98f00b204e9800998ecf8427e",
+    "groups": [
+      {
+        "name": "Payment Flow",
+        "path": "::Payment Flow",
+        "id": "31cf1b420c5a2a734f7ce7d7f5e9c9a2",
+        "groups": [],
+        "checks": [
+            {
+              "name": "balance query success",
+              "path": "::Payment Flow::balance query success",
+              "id": "67f793ed0f70273945696a5023c82a6b",
+              "passes": 425,
+              "fails": 0
+            },
+            {
+              "name": "status is 201 or 4xx",
+              "path": "::Payment Flow::status is 201 or 4xx",
+              "id": "94175814a44141ecfda9d5faa69295f7",
+              "passes": 425,
+              "fails": 0
+            },
+            {
+              "id": "d0a552db5c57039a73b33c5b8f707842",
+              "passes": 425,
+              "fails": 0,
+              "name": "no 500 errors",
+              "path": "::Payment Flow::no 500 errors"
+            }
+          ]
+      }
+    ],
+    "checks": [],
+    "name": ""
+  },
+  "options": {
+    "summaryTimeUnit": "",
+    "noColor": false,
+    "summaryTrendStats": [
+      "avg",
+      "min",
+      "med",
+      "max",
+      "p(90)",
+      "p(95)"
+    ]
+  }
+}

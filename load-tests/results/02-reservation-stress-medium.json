@@ -1,0 +1,515 @@
+{
+  "root_group": {
+    "path": "",
+    "id": "d41d8cd98f00b204e9800998ecf8427e",
+    "groups": [
+      {
+        "name": "Seat Reservation Flow",
+        "path": "::Seat Reservation Flow",
+        "id": "7195d7edbb5b56ddc3b5135f048587b1",
+        "groups": [],
+        "checks": [
+            {
+              "name": "seats query success",
+              "path": "::Seat Reservation Flow::seats query success",
+              "id": "f2c0d0647af3afee335d8432398f1b16",
+              "passes": 1207,
+              "fails": 0
+            },
+            {
+              "name": "status is 201 or 4xx",
+              "path": "::Seat Reservation Flow::status is 201 or 4xx",
+              "id": "af578bece74cdcaab3dd84bcf0a4db22",
+              "passes": 1207,
+              "fails": 0
+            },
+            {
+              "id": "1141e45ee5baa6fe7283ca1822c21693",
+              "passes": 1207,
+              "fails": 0,
+              "name": "no 500 errors",
+              "path": "::Seat Reservation Flow::no 500 errors"
+            },
+            {
+              "id": "25f7c4e5be460bcec53b5882ffe70592",
+              "passes": 1207,
+              "fails": 0,
+              "name": "response has body",
+              "path": "::Seat Reservation Flow::response has body"
+            }
+          ]
+      }
+    ],
+    "checks": [],
+    "name": ""
+  },
+  "options": {
+    "summaryTrendStats": [
+      "avg",
+      "min",
+      "med",
+      "max",
+      "p(90)",
+      "p(95)"
+    ],
+    "summaryTimeUnit": "",
+    "noColor": false
+  },
+  "state": {
+    "isStdOutTTY": false,
+    "isStdErrTTY": false,
+    "testRunDurationMs": 137200.821137
+  },
+  "metrics": {
+    "http_req_connecting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 0,
+        "med": 0,
+        "max": 2.561403,
+        "p(90)": 0,
+        "p(95)": 0,
+        "avg": 0.00864541030844156
+      }
+    },
+    "http_req_duration{expected_response:true}": {
+      "values": {
+        "med": 1.830488,
+        "max": 6.229571,
+        "p(90)": 2.3745494000000003,
+        "p(95)": 2.6253908000000004,
+        "avg": 1.8888810405727978,
+        "min": 0.363521
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "data_sent": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 423535,
+        "rate": 3086.971320507513
+      }
+    },
+    "iteration_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 4001.5130033338837,
+        "min": 2509.855997,
+        "med": 4011.219192,
+        "max": 5506.541005,
+        "p(90)": 5174.7345204,
+        "p(95)": 5336.596538000001
+      }
+    },
+    "http_req_blocked": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 0.021006688311688306,
+        "min": 0.003126,
+        "med": 0.008296,
+        "max": 3.716968,
+        "p(90)": 0.012078000000000005,
+        "p(95)": 0.015220999999999995
+      }
+    },
+    "http_req_waiting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 6.8863181,
+        "avg": 3.74176878530844,
+        "min": 0.213196,
+        "med": 2.828876,
+        "max": 56.647495,
+        "p(90)": 6.413751700000001
+      }
+    },
+    "checks": {
+      "values": {
+        "fails": 0,
+        "rate": 1,
+        "passes": 4828
+      },
+      "type": "rate",
+      "contains": "default"
+    },
+    "http_reqs": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 2464,
+        "rate": 17.959076189052883
+      }
+    },
+    "http_req_failed": {
+      "contains": "default",
+      "values": {
+        "rate": 0.4898538961038961,
+        "passes": 1207,
+        "fails": 1257
+      },
+      "thresholds": {
+        "rate<0.05": {
+          "ok": false
+        }
+      },
+      "type": "rate"
+    },
+    "group_duration": {
+      "contains": "time",
+      "values": {
+        "avg": 509.23738499668724,
+        "min": 506.634927,
+        "med": 509.206632,
+        "max": 559.916645,
+        "p(90)": 510.4237956,
+        "p(95)": 510.7415489
+      },
+      "type": "trend"
+    },
+    "http_req_receiving": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 0.14555997402597423,
+        "min": 0.033275,
+        "med": 0.136158,
+        "max": 0.614049,
+        "p(90)": 0.21145060000000002,
+        "p(95)": 0.23467434999999998
+      }
+    },
+    "reservation_conflict": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 1207,
+        "rate": 8.797323441634266
+      }
+    },
+    "reservation_duration": {
+      "type": "trend",
+      "contains": "default",
+      "values": {
+        "p(95)": 8,
+        "avg": 6.291632145816073,
+        "min": 4,
+        "med": 6,
+        "max": 57,
+        "p(90)": 7
+      },
+      "thresholds": {
+        "p(99)<2000": {
+          "ok": true
+        }
+      }
+    },
+    "data_received": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 6329037,
+        "rate": 46129.731203869596
+      }
+    },
+    "iterations": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 1207,
+        "rate": 8.797323441634266
+      }
+    },
+    "errors": {
+      "thresholds": {
+        "rate<0.05": {
+          "ok": true
+        }
+      },
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 1207
+      }
+    },
+    "http_req_sending": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 0.552037,
+        "p(90)": 0.09296000000000003,
+        "p(95)": 0.10779284999999994,
+        "avg": 0.05802636931818181,
+        "min": 0.009789,
+        "med": 0.053615499999999996
+      }
+    },
+    "http_req_tls_handshaking": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 0,
+        "p(90)": 0,
+        "p(95)": 0,
+        "avg": 0,
+        "min": 0,
+        "med": 0
+      }
+    },
+    "active_vus": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 4,
+        "min": 1,
+        "max": 50
+      }
+    },
+    "http_req_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 3.9453551286525905,
+        "min": 0.363521,
+        "med": 3.05703,
+        "max": 56.863904,
+        "p(90)": 6.620956700000002,
+        "p(95)": 7.07673255
+      },
+      "thresholds": {
+        "p(95)<1000": {
+          "ok": true
+        }
+      }
+    },
+    "vus_max": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "max": 50,
+        "value": 50,
+        "min": 50
+      }
+    },
+    "vus": {
+      "values": {
+        "value": 1,
+        "min": 0,
+        "max": 50
+      },
+      "type": "gauge",
+      "contains": "default"
+    }
+  },
+  "setup_data": {
+    "tokens": [
+      {
+        "token": "d7c0a7d0-a4b7-475e-8e99-f3e0444e197b",
+        "userId": "loadtest_user_1"
+      },
+      {
+        "token": "0530c5d7-bb5f-4091-9d75-c4ee3731deff",
+        "userId": "loadtest_user_2"
+      },
+      {
+        "token": "56e23217-b089-4bba-887a-74bd012f33a0",
+        "userId": "loadtest_user_3"
+      },
+      {
+        "token": "caa25b4c-1148-4c69-aad4-147e36788847",
+        "userId": "loadtest_user_4"
+      },
+      {
+        "token": "8bb9aa83-7f96-4ac3-93b8-291c60ab433d",
+        "userId": "loadtest_user_5"
+      },
+      {
+        "token": "218dce51-8dd7-41b3-a561-db5360d49a7a",
+        "userId": "loadtest_user_6"
+      },
+      {
+        "userId": "loadtest_user_7",
+        "token": "1f27acb7-081c-40c1-acae-f819eb7a4ab0"
+      },
+      {
+        "token": "cf0afe53-298c-4896-9a7d-d64688827b8e",
+        "userId": "loadtest_user_8"
+      },
+      {
+        "token": "2ee573b0-066c-44b9-a525-6e518994c298",
+        "userId": "loadtest_user_9"
+      },
+      {
+        "token": "d4b43e88-3643-4c8d-8146-248303c28f06",
+        "userId": "loadtest_user_10"
+      },
+      {
+        "token": "5ebbb486-6b56-4275-849f-bc1d4cccc7c2",
+        "userId": "loadtest_user_11"
+      },
+      {
+        "token": "7a9573d8-2642-4778-88d2-936d4884460a",
+        "userId": "loadtest_user_12"
+      },
+      {
+        "token": "1705f9a7-cfba-470a-be5a-09f0abbfe2d7",
+        "userId": "loadtest_user_13"
+      },
+      {
+        "token": "378fafb8-3a46-42c0-b48b-462951ab68d9",
+        "userId": "loadtest_user_14"
+      },
+      {
+        "token": "222877e9-eec0-423c-9067-200d2a13f44e",
+        "userId": "loadtest_user_15"
+      },
+      {
+        "token": "ef7042c7-39ce-4968-b785-edf2ca8335da",
+        "userId": "loadtest_user_16"
+      },
+      {
+        "token": "18ff8a7c-c916-47a6-b557-1b250ddada84",
+        "userId": "loadtest_user_17"
+      },
+      {
+        "token": "15b76178-c948-42db-b26a-5799f72f9e87",
+        "userId": "loadtest_user_18"
+      },
+      {
+        "token": "df8089a2-391e-4256-b625-2bbcfdec0da7",
+        "userId": "loadtest_user_19"
+      },
+      {
+        "token": "7583fefd-2620-4ee0-b77a-6c300d7cfb65",
+        "userId": "loadtest_user_20"
+      },
+      {
+        "token": "c97f0adc-b303-49c4-87e1-6ccf0243a051",
+        "userId": "loadtest_user_21"
+      },
+      {
+        "token": "595e25e6-4881-41bc-a434-93d72f28834b",
+        "userId": "loadtest_user_22"
+      },
+      {
+        "token": "a5940cf5-e00e-42e9-b8f0-4a9e3cab6cb3",
+        "userId": "loadtest_user_23"
+      },
+      {
+        "token": "d353c09e-37d1-426f-8cbb-b4a512cd391b",
+        "userId": "loadtest_user_24"
+      },
+      {
+        "token": "ab8646a7-b084-4d13-83e4-d0647b201a7f",
+        "userId": "loadtest_user_25"
+      },
+      {
+        "userId": "loadtest_user_26",
+        "token": "f566cff2-22c0-46af-8075-49bebdf75bf7"
+      },
+      {
+        "token": "a493f8c5-5083-4568-a925-86b4e3a7306a",
+        "userId": "loadtest_user_27"
+      },
+      {
+        "token": "b470fa17-20fc-4710-8722-e3204c922e4d",
+        "userId": "loadtest_user_28"
+      },
+      {
+        "token": "d73ff6ec-d420-4adf-a69d-774fe97c4f40",
+        "userId": "loadtest_user_29"
+      },
+      {
+        "token": "9fce3075-74b4-4710-ab8f-42782445d7d1",
+        "userId": "loadtest_user_30"
+      },
+      {
+        "userId": "loadtest_user_31",
+        "token": "5da81bdd-39b6-4244-ad94-8563a439c519"
+      },
+      {
+        "token": "5cbe761b-9779-4d42-8669-d00291671554",
+        "userId": "loadtest_user_32"
+      },
+      {
+        "token": "7227f693-b596-4580-b0ee-756e1efb3fb1",
+        "userId": "loadtest_user_33"
+      },
+      {
+        "token": "3d9856a5-ce0e-41ca-9505-b4e448e18397",
+        "userId": "loadtest_user_34"
+      },
+      {
+        "token": "0abb97d9-df12-4dc5-8205-ec7eedaa9b37",
+        "userId": "loadtest_user_35"
+      },
+      {
+        "token": "2931a99a-e1d8-40df-b221-438ff14afa6f",
+        "userId": "loadtest_user_36"
+      },
+      {
+        "userId": "loadtest_user_37",
+        "token": "83753547-99ff-4d89-8fb7-6713d9b9f381"
+      },
+      {
+        "token": "123a8629-f6a6-40c3-8b33-e4eae3d20129",
+        "userId": "loadtest_user_38"
+      },
+      {
+        "token": "7c79f4b8-b865-44ab-9e2b-6633c7d9a2b1",
+        "userId": "loadtest_user_39"
+      },
+      {
+        "userId": "loadtest_user_40",
+        "token": "878ee332-2697-4898-aca9-a585512c086a"
+      },
+      {
+        "token": "c08953d2-95ce-4aac-b160-4f3eb2f314a6",
+        "userId": "loadtest_user_41"
+      },
+      {
+        "token": "bc4f289f-c816-4ba8-b0fa-25889777ffec",
+        "userId": "loadtest_user_42"
+      },
+      {
+        "token": "37d02fdd-24b3-4c84-960d-7480ac4db3ae",
+        "userId": "loadtest_user_43"
+      },
+      {
+        "token": "ce2fcac1-45c1-4fd2-9332-e67c00b99950",
+        "userId": "loadtest_user_44"
+      },
+      {
+        "token": "39c746b6-295f-42f8-916e-8b8182bfac64",
+        "userId": "loadtest_user_45"
+      },
+      {
+        "token": "651f364b-7277-4530-a1d7-15beb7cf4fb7",
+        "userId": "loadtest_user_46"
+      },
+      {
+        "token": "c6fda3ea-6a08-41e6-aea2-e4d88f419aa0",
+        "userId": "loadtest_user_47"
+      },
+      {
+        "token": "dd941fd3-3e6e-47c3-a869-d5ada997b358",
+        "userId": "loadtest_user_48"
+      },
+      {
+        "token": "f731efaf-cc5a-40df-8133-47b8aca14bb4",
+        "userId": "loadtest_user_49"
+      },
+      {
+        "userId": "loadtest_user_50",
+        "token": "4c397433-bbf7-424a-8fa4-0521ddfd9ac1"
+      }
+    ]
+  }
+}

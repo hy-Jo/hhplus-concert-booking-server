@@ -7,13 +7,16 @@ import { ReservationRepositoryImpl } from '../infrastructure/persistence/reserva
 import { ConcertModule } from '../concert/concert.module';
 import { ReservationController } from '../interfaces/controllers/reservation.controller';
 import { DI_TOKENS } from '../common/di-tokens';
+import { KafkaModule } from '../infrastructure/kafka/kafka.module';
+import { ReservationExpirationConsumer } from './reservation-expiration.consumer';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Reservation]), ConcertModule],
+  imports: [TypeOrmModule.forFeature([Reservation]), ConcertModule, KafkaModule],
   controllers: [ReservationController],
   providers: [
     ReservationService,
     ReservationScheduler,
+    ReservationExpirationConsumer,
     {
       provide: DI_TOKENS.RESERVATION_REPOSITORY,
       useClass: ReservationRepositoryImpl,

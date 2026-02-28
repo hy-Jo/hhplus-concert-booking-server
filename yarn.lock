@@ -854,6 +854,13 @@
     tslib "2.8.1"
     uid "2.0.2"
 
+"@nestjs/event-emitter@^3.0.1":
+  version "3.0.1"
+  resolved "https://registry.npmmirror.com/@nestjs/event-emitter/-/event-emitter-3.0.1.tgz"
+  integrity sha512-0Ln/x+7xkU6AJFOcQI9tIhUMXVF7D5itiaQGOyJbXtlAfAIt8gzDdJm+Im7cFzKoWkiW5nCXCPh6GSvdQd/3Dw==
+  dependencies:
+    eventemitter2 "6.4.9"
+
 "@nestjs/mapped-types@2.1.0":
   version "2.1.0"
   resolved "https://registry.npmmirror.com/@nestjs/mapped-types/-/mapped-types-2.1.0.tgz"
@@ -3025,6 +3032,11 @@ etag@~1.8.1:
   resolved "https://registry.npmjs.org/etag/-/etag-1.8.1.tgz"
   integrity sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==
 
+eventemitter2@6.4.9:
+  version "6.4.9"
+  resolved "https://registry.npmmirror.com/eventemitter2/-/eventemitter2-6.4.9.tgz"
+  integrity sha512-JEPTiaOt9f04oa6NOkc4aH+nVp5I3wEjpHbIPqfgCdD5v5bUzy7xQqwcVO2aDQgOWhI28da57HksMrzK9HlRxg==
+
 events@^3.2.0:
   version "3.3.0"
   resolved "https://registry.npmjs.org/events/-/events-3.3.0.tgz"
@@ -4417,6 +4429,11 @@ jsonfile@^6.0.1:
     universalify "^2.0.0"
   optionalDependencies:
     graceful-fs "^4.1.6"
+
+kafkajs@^2.2.4:
+  version "2.2.4"
+  resolved "https://registry.npmmirror.com/kafkajs/-/kafkajs-2.2.4.tgz"
+  integrity sha512-j/YeapB1vfPT2iOIUn/vxdyKEuhuY2PxMBvf5JWux6iSaukAccrMtXEY/Lb7OvavDhOWME589bpLrEdnVHjfjA==
 
 keyv@^4.5.3:
   version "4.5.4"
