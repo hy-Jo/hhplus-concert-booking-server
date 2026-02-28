@@ -1,0 +1,407 @@
+{
+  "root_group": {
+    "checks": [],
+    "name": "",
+    "path": "",
+    "id": "d41d8cd98f00b204e9800998ecf8427e",
+    "groups": [
+        {
+          "name": "Payment Flow",
+          "path": "::Payment Flow",
+          "id": "31cf1b420c5a2a734f7ce7d7f5e9c9a2",
+          "groups": [],
+          "checks": [
+              {
+                "name": "balance query success",
+                "path": "::Payment Flow::balance query success",
+                "id": "67f793ed0f70273945696a5023c82a6b",
+                "passes": 430,
+                "fails": 0
+              },
+              {
+                "name": "status is 201 or 4xx",
+                "path": "::Payment Flow::status is 201 or 4xx",
+                "id": "94175814a44141ecfda9d5faa69295f7",
+                "passes": 430,
+                "fails": 0
+              },
+              {
+                "name": "no 500 errors",
+                "path": "::Payment Flow::no 500 errors",
+                "id": "d0a552db5c57039a73b33c5b8f707842",
+                "passes": 430,
+                "fails": 0
+              }
+            ]
+        }
+      ]
+  },
+  "options": {
+    "noColor": false,
+    "summaryTrendStats": [
+      "avg",
+      "min",
+      "med",
+      "max",
+      "p(90)",
+      "p(95)"
+    ],
+    "summaryTimeUnit": ""
+  },
+  "state": {
+    "isStdOutTTY": false,
+    "isStdErrTTY": false,
+    "testRunDurationMs": 141136.76703
+  },
+  "metrics": {
+    "http_req_duration{expected_response:true}": {
+      "values": {
+        "max": 159.338434,
+        "p(90)": 27.178168600000003,
+        "p(95)": 41.704224699999806,
+        "avg": 10.100927968627463,
+        "min": 1.592778,
+        "med": 2.6630715
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "payment_failed": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 410,
+        "rate": 2.904983645493669
+      }
+    },
+    "http_req_duration": {
+      "contains": "time",
+      "values": {
+        "avg": 8.419044386956525,
+        "min": 1.592778,
+        "med": 4.015829500000001,
+        "max": 159.338434,
+        "p(90)": 21.546482500000003,
+        "p(95)": 35.37496794999999
+      },
+      "thresholds": {
+        "p(95)<800": {
+          "ok": true
+        }
+      },
+      "type": "trend"
+    },
+    "http_req_connecting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(90)": 0.24206230000000004,
+        "p(95)": 0.33361409999999997,
+        "avg": 0.040853500000000015,
+        "min": 0,
+        "med": 0,
+        "max": 0.632527
+      }
+    },
+    "checks": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 1,
+        "passes": 1290,
+        "fails": 0
+      }
+    },
+    "payment_success": {
+      "contains": "default",
+      "values": {
+        "count": 20,
+        "rate": 0.14170651929237407
+      },
+      "type": "counter"
+    },
+    "http_req_receiving": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 0.14387346086956515,
+        "min": 0.069387,
+        "med": 0.13256600000000002,
+        "max": 0.434166,
+        "p(90)": 0.20267790000000002,
+        "p(95)": 0.23075264999999995
+      }
+    },
+    "group_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 464.435989,
+        "p(90)": 338.2603661,
+        "p(95)": 347.86117459999986,
+        "avg": 316.61296533720974,
+        "min": 306.00455,
+        "med": 308.9544295
+      }
+    },
+    "vus_max": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 20,
+        "min": 20,
+        "max": 20
+      }
+    },
+    "http_req_failed": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0.44565217391304346,
+        "passes": 410,
+        "fails": 510
+      },
+      "thresholds": {
+        "rate<0.02": {
+          "ok": false
+        }
+      }
+    },
+    "http_req_sending": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 0.0645455195652174,
+        "min": 0.011333,
+        "med": 0.0595325,
+        "max": 0.354277,
+        "p(90)": 0.10041810000000001,
+        "p(95)": 0.11778404999999996
+      }
+    },
+    "http_reqs": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "rate": 6.518499887449208,
+        "count": 920
+      }
+    },
+    "vus": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 2,
+        "min": 0,
+        "max": 20
+      }
+    },
+    "data_received": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 312200,
+        "rate": 2212.0387661539594
+      }
+    },
+    "iterations": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 430,
+        "rate": 3.046690164786043
+      }
+    },
+    "http_req_waiting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 1.457672,
+        "med": 3.8126474999999997,
+        "max": 159.073591,
+        "p(90)": 21.3647432,
+        "p(95)": 35.138006749999995,
+        "avg": 8.210625406521736
+      }
+    },
+    "errors": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 430
+      },
+      "thresholds": {
+        "rate<0.02": {
+          "ok": true
+        }
+      }
+    },
+    "iteration_duration": {
+      "contains": "time",
+      "values": {
+        "max": 7304.630321,
+        "p(90)": 6842.0129683000005,
+        "p(95)": 7036.6926392999985,
+        "avg": 5279.523605458142,
+        "min": 3328.204208,
+        "med": 5274.716112
+      },
+      "type": "trend"
+    },
+    "http_req_tls_handshaking": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 0,
+        "min": 0,
+        "med": 0,
+        "max": 0,
+        "p(90)": 0,
+        "p(95)": 0
+      }
+    },
+    "http_req_blocked": {
+      "contains": "time",
+      "values": {
+        "p(95)": 0.4655613499999996,
+        "avg": 0.06651808478260869,
+        "min": 0.004258,
+        "med": 0.008186,
+        "max": 1.731483,
+        "p(90)": 0.34392170000000016
+      },
+      "type": "trend"
+    },
+    "data_sent": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 166036,
+        "rate": 1176.4191818614313
+      }
+    },
+    "payment_duration": {
+      "type": "trend",
+      "contains": "default",
+      "values": {
+        "p(95)": 38.549999999999955,
+        "avg": 9.44186046511628,
+        "min": 3,
+        "med": 5,
+        "max": 159,
+        "p(90)": 8.100000000000023
+      },
+      "thresholds": {
+        "p(99)<1500": {
+          "ok": true
+        }
+      }
+    }
+  },
+  "setup_data": {
+    "reservations": [
+      {
+        "reservationId": "1d9e4902-d51a-4912-b057-4d7071a0a96e",
+        "token": "59660f19-9831-41eb-a3ec-65d600da1e8a",
+        "userId": "payment_user_1"
+      },
+      {
+        "reservationId": "9e8c0f9a-1cda-4809-a65f-48eb2c66fb7f",
+        "token": "70de9616-1dd7-4bd2-b5e9-5184f334a006",
+        "userId": "payment_user_2"
+      },
+      {
+        "reservationId": "a48d5ee4-46f7-4b11-a810-3d74425481a8",
+        "token": "52b668dd-6ba3-42b6-b475-6fb96486f35b",
+        "userId": "payment_user_3"
+      },
+      {
+        "userId": "payment_user_4",
+        "reservationId": "8a06516a-6254-44ec-ae19-ca0b270a2838",
+        "token": "20be0e41-862d-4ac3-8983-ec6c45570407"
+      },
+      {
+        "token": "1fc65a22-8163-46b6-b8b8-cddd0bb4adcf",
+        "userId": "payment_user_5",
+        "reservationId": "19d35d43-fa05-4304-831b-d929384b8504"
+      },
+      {
+        "token": "24154809-08ef-4bcb-a5dd-88874ab0cea5",
+        "userId": "payment_user_6",
+        "reservationId": "0d5a4863-ba5b-461a-852a-ba8a8358ad83"
+      },
+      {
+        "userId": "payment_user_7",
+        "reservationId": "f101abab-1015-4212-89b0-af9a95af5595",
+        "token": "a73ae6ab-02fd-448d-90d9-5b6f54179183"
+      },
+      {
+        "reservationId": "0d1225ea-d42e-43ad-a566-4bed33038526",
+        "token": "e606413d-2e00-4caf-93e3-a57aa43385d8",
+        "userId": "payment_user_8"
+      },
+      {
+        "userId": "payment_user_9",
+        "reservationId": "4c8e9096-5237-458f-9512-c11da9d2d6c0",
+        "token": "b0be4af4-f3f4-4523-93d1-b87853ee1662"
+      },
+      {
+        "reservationId": "0adc6cf3-a905-4cf4-8763-53ad1dbbf2b7",
+        "token": "0d9f14b0-06b6-4cc1-ba67-a40d7d17b13a",
+        "userId": "payment_user_10"
+      },
+      {
+        "reservationId": "febd7e3e-e0b3-45d2-9ec5-0e083dc27361",
+        "token": "0ce7b782-d238-430d-9ac4-363e4639d678",
+        "userId": "payment_user_11"
+      },
+      {
+        "reservationId": "be0b6496-da1f-4392-8231-353c18db199a",
+        "token": "92b4303b-f236-4cc8-8711-fbf9708a91c2",
+        "userId": "payment_user_12"
+      },
+      {
+        "reservationId": "5753a25d-cf7b-40f6-8fd3-4337b403249a",
+        "token": "ccac8ad0-7eb7-4272-b3ff-9d43abe3f63e",
+        "userId": "payment_user_13"
+      },
+      {
+        "reservationId": "67491434-ff8a-4c98-8eb2-6a509fe321b6",
+        "token": "4fc5b12f-78a5-4aff-b1ae-d3dcf49a1767",
+        "userId": "payment_user_14"
+      },
+      {
+        "reservationId": "c95eb3a6-2439-496a-a2a7-e8c34ddac99f",
+        "token": "7acb8b03-f0e2-4a9e-9145-3ad6bc41e502",
+        "userId": "payment_user_15"
+      },
+      {
+        "reservationId": "1cb2f81b-1bcb-4f33-a9b8-541746ee3df3",
+        "token": "65660a8e-e670-4984-8655-83aa67c70b00",
+        "userId": "payment_user_16"
+      },
+      {
+        "reservationId": "328f103a-850d-4f6c-9745-60c110a41460",
+        "token": "4ddfa45a-11ee-4b32-a80e-b96ecec10bae",
+        "userId": "payment_user_17"
+      },
+      {
+        "reservationId": "c70d54ea-b2ac-45ba-b45d-d302ba7759e6",
+        "token": "ab8d4677-49b4-412a-8202-7a9e0516ae5c",
+        "userId": "payment_user_18"
+      },
+      {
+        "reservationId": "5a613448-fd26-4552-baea-225be6e4b0b2",
+        "token": "6278e74e-3ac3-457d-ac22-473bfc0148cb",
+        "userId": "payment_user_19"
+      },
+      {
+        "reservationId": "150c4b4e-fbe4-474c-af96-63b5deea631a",
+        "token": "24fd3dbe-0e0b-438c-a70b-86c18933da0c",
+        "userId": "payment_user_20"
+      }
+    ]
+  }
+}

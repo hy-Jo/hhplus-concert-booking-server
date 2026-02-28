@@ -1,0 +1,515 @@
+{
+  "state": {
+    "isStdOutTTY": false,
+    "isStdErrTTY": false,
+    "testRunDurationMs": 138819.70427
+  },
+  "metrics": {
+    "errors": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 1229
+      },
+      "thresholds": {
+        "rate<0.05": {
+          "ok": true
+        }
+      }
+    },
+    "iteration_duration": {
+      "values": {
+        "med": 3885.026751,
+        "max": 5603.779847,
+        "p(90)": 5188.3066876,
+        "p(95)": 5370.062418799999,
+        "avg": 3942.5659281000826,
+        "min": 2509.922305
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "http_reqs": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 2508,
+        "rate": 18.066599501768266
+      }
+    },
+    "http_req_duration{expected_response:true}": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "med": 1.811389,
+        "max": 193.26478,
+        "p(90)": 9.798117000000012,
+        "p(95)": 22.128342099999973,
+        "avg": 4.389749889757619,
+        "min": 0.904783
+      }
+    },
+    "data_sent": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 428547,
+        "rate": 3087.076162952267
+      }
+    },
+    "reservation_conflict": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 1229,
+        "rate": 8.853210042931899
+      }
+    },
+    "http_req_connecting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "med": 0,
+        "max": 0.670997,
+        "p(90)": 0,
+        "p(95)": 0,
+        "avg": 0.0066075618022328544,
+        "min": 0
+      }
+    },
+    "http_req_tls_handshaking": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 0,
+        "p(90)": 0,
+        "p(95)": 0,
+        "avg": 0,
+        "min": 0,
+        "med": 0
+      }
+    },
+    "vus_max": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 50,
+        "min": 50,
+        "max": 50
+      }
+    },
+    "group_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 538.3104922,
+        "avg": 514.353060306753,
+        "min": 505.584695,
+        "med": 509.187505,
+        "max": 791.79873,
+        "p(90)": 528.7489702
+      }
+    },
+    "reservation_duration": {
+      "contains": "default",
+      "values": {
+        "avg": 8.9519934906428,
+        "min": 4,
+        "med": 6,
+        "max": 288,
+        "p(90)": 8,
+        "p(95)": 14.199999999999818
+      },
+      "thresholds": {
+        "p(99)<2000": {
+          "ok": true
+        }
+      },
+      "type": "trend"
+    },
+    "data_received": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 6444103,
+        "rate": 46420.665091364994
+      }
+    },
+    "checks": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 1,
+        "passes": 4916,
+        "fails": 0
+      }
+    },
+    "active_vus": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 3,
+        "min": 1,
+        "max": 50
+      }
+    },
+    "http_req_blocked": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 1.813265,
+        "p(90)": 0.012854300000000006,
+        "p(95)": 0.01691665000000002,
+        "avg": 0.01873646610845305,
+        "min": 0.002294,
+        "med": 0.008431500000000001
+      }
+    },
+    "http_req_receiving": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 1.36416,
+        "p(90)": 0.22215630000000008,
+        "p(95)": 0.2526511000000001,
+        "avg": 0.15345853867623582,
+        "min": 0.021853,
+        "med": 0.1405115
+      }
+    },
+    "iterations": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 1229,
+        "rate": 8.853210042931899
+      }
+    },
+    "http_req_waiting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 21.4977273,
+        "avg": 6.288958697767148,
+        "min": 0.778735,
+        "med": 4.5380735,
+        "max": 287.902442,
+        "p(90)": 7.657739500000003
+      }
+    },
+    "vus": {
+      "values": {
+        "value": 3,
+        "min": 0,
+        "max": 50
+      },
+      "type": "gauge",
+      "contains": "default"
+    },
+    "http_req_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "med": 4.7567135,
+        "max": 288.062217,
+        "p(90)": 7.916229700000001,
+        "p(95)": 21.6861089,
+        "avg": 6.5003911499202545,
+        "min": 0.904783
+      },
+      "thresholds": {
+        "p(95)<1000": {
+          "ok": true
+        }
+      }
+    },
+    "http_req_failed": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0.49003189792663476,
+        "passes": 1229,
+        "fails": 1279
+      },
+      "thresholds": {
+        "rate<0.05": {
+          "ok": false
+        }
+      }
+    },
+    "http_req_sending": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 0.1058075,
+        "avg": 0.057973913476874056,
+        "min": 0.008187,
+        "med": 0.053561,
+        "max": 0.490967,
+        "p(90)": 0.0909983
+      }
+    }
+  },
+  "setup_data": {
+    "tokens": [
+      {
+        "userId": "loadtest_user_1",
+        "token": "ee451de2-ea5a-40b3-96ec-84f4ba9f48d6"
+      },
+      {
+        "token": "65285495-71f1-4106-8758-ddeb437ebd75",
+        "userId": "loadtest_user_2"
+      },
+      {
+        "token": "a83d5902-9995-456e-b4d1-94000defeb6b",
+        "userId": "loadtest_user_3"
+      },
+      {
+        "token": "02db63dc-d9a3-4b77-a605-93fcec6f7a42",
+        "userId": "loadtest_user_4"
+      },
+      {
+        "token": "daa96781-5757-4c21-85a7-9573b62e1e04",
+        "userId": "loadtest_user_5"
+      },
+      {
+        "token": "6bf14966-b49f-4b41-8612-40c8cb50fe9e",
+        "userId": "loadtest_user_6"
+      },
+      {
+        "token": "e1a11377-2a8f-4c59-b6ae-a826ea523176",
+        "userId": "loadtest_user_7"
+      },
+      {
+        "token": "4260b3a5-6edd-4243-a9f2-d07cedc3241c",
+        "userId": "loadtest_user_8"
+      },
+      {
+        "token": "1006ff04-08d1-4521-860e-c8a1ccfdbb07",
+        "userId": "loadtest_user_9"
+      },
+      {
+        "token": "b75bb6e3-b56e-4fc8-b034-626096d3b746",
+        "userId": "loadtest_user_10"
+      },
+      {
+        "token": "2af62922-935f-4fc3-8a91-f39ec6cdffa8",
+        "userId": "loadtest_user_11"
+      },
+      {
+        "token": "485b3af9-b319-4587-b1cf-72e4b4de4408",
+        "userId": "loadtest_user_12"
+      },
+      {
+        "token": "ad9cd5f7-ac65-4d6e-943a-1c0e58aa4df7",
+        "userId": "loadtest_user_13"
+      },
+      {
+        "token": "140d08eb-3431-449f-8ba5-4602cd598761",
+        "userId": "loadtest_user_14"
+      },
+      {
+        "token": "4482ca0d-271b-4364-af16-8d380d3638fa",
+        "userId": "loadtest_user_15"
+      },
+      {
+        "token": "582318a6-5adc-4ccd-9f74-245acc0c8e06",
+        "userId": "loadtest_user_16"
+      },
+      {
+        "token": "8a246599-0246-4e89-8598-38e0fef5061c",
+        "userId": "loadtest_user_17"
+      },
+      {
+        "token": "6b94d39e-82ee-460d-a642-e13b4fc57398",
+        "userId": "loadtest_user_18"
+      },
+      {
+        "token": "23cb2923-5dab-4a97-9150-6d165df42834",
+        "userId": "loadtest_user_19"
+      },
+      {
+        "userId": "loadtest_user_20",
+        "token": "ae1e4bd4-8cbc-4483-bb35-c86f9ebd9660"
+      },
+      {
+        "token": "65109669-c93a-4220-ba82-d0a84fa543f0",
+        "userId": "loadtest_user_21"
+      },
+      {
+        "token": "cc0adcb4-56f3-4f9a-8a34-2bd083bc3bb0",
+        "userId": "loadtest_user_22"
+      },
+      {
+        "userId": "loadtest_user_23",
+        "token": "3867e653-edbb-473b-892f-9915b23669c6"
+      },
+      {
+        "token": "6edc9e2f-c998-4e11-8923-2737cbc49a5b",
+        "userId": "loadtest_user_24"
+      },
+      {
+        "userId": "loadtest_user_25",
+        "token": "3516a580-43d1-46b1-8f55-e1deb7712627"
+      },
+      {
+        "token": "a032f133-c1b7-4fd1-b1b6-f5e602ae6a1a",
+        "userId": "loadtest_user_26"
+      },
+      {
+        "token": "595663bb-1405-4eb9-8625-c3d434bd67d9",
+        "userId": "loadtest_user_27"
+      },
+      {
+        "userId": "loadtest_user_28",
+        "token": "0bfee60d-6b3f-4007-a90c-edab03f718ed"
+      },
+      {
+        "token": "90b02a6f-b239-4d65-b63e-d2b63f55e7c3",
+        "userId": "loadtest_user_29"
+      },
+      {
+        "token": "70ab5136-bc3f-46c8-bb79-c9c41f349c6c",
+        "userId": "loadtest_user_30"
+      },
+      {
+        "token": "665f4960-27e9-48aa-b307-6c640c2dae2c",
+        "userId": "loadtest_user_31"
+      },
+      {
+        "token": "c38e9a02-83c8-409e-b49a-6d6a9fb426ea",
+        "userId": "loadtest_user_32"
+      },
+      {
+        "token": "25b2d04b-e5d6-4ebd-a7ca-f8de5fd92806",
+        "userId": "loadtest_user_33"
+      },
+      {
+        "token": "bfb298b7-80a2-44c3-aba3-d4ec9ce52b72",
+        "userId": "loadtest_user_34"
+      },
+      {
+        "token": "49db7cfa-0be7-4f0f-9e6a-d87c37fb87de",
+        "userId": "loadtest_user_35"
+      },
+      {
+        "token": "0e904098-edde-452a-83c9-c1af84e9f61d",
+        "userId": "loadtest_user_36"
+      },
+      {
+        "userId": "loadtest_user_37",
+        "token": "fbd07abb-325b-46f7-82d3-46c9240dfd3c"
+      },
+      {
+        "token": "76b0f26d-bdcf-4485-87be-d6ea1a49bdb0",
+        "userId": "loadtest_user_38"
+      },
+      {
+        "token": "4cd7ba21-7765-42ee-a87c-9efd9ae9e6d9",
+        "userId": "loadtest_user_39"
+      },
+      {
+        "token": "b2531de3-db33-46c3-879e-7ffb6b1afeb5",
+        "userId": "loadtest_user_40"
+      },
+      {
+        "token": "c4ef3450-a94b-40bb-87a7-d554f53500d1",
+        "userId": "loadtest_user_41"
+      },
+      {
+        "token": "2f2bc3e6-4b87-4515-aca8-b03f672f8103",
+        "userId": "loadtest_user_42"
+      },
+      {
+        "userId": "loadtest_user_43",
+        "token": "ad542939-494f-440f-9be8-7006d9a2a0ba"
+      },
+      {
+        "token": "e5748b85-ee07-4a22-a87f-f3bea1110856",
+        "userId": "loadtest_user_44"
+      },
+      {
+        "token": "cfafd5c6-9a65-4bbb-8d5e-0bbe3b440cdf",
+        "userId": "loadtest_user_45"
+      },
+      {
+        "userId": "loadtest_user_46",
+        "token": "f14d7672-56dc-4509-90ba-0e406d534294"
+      },
+      {
+        "token": "c618f376-36d3-4258-a513-4d03f56ca306",
+        "userId": "loadtest_user_47"
+      },
+      {
+        "userId": "loadtest_user_48",
+        "token": "65f9adf7-af1b-48f8-adfc-1f97ed1313db"
+      },
+      {
+        "token": "684985ad-d363-4e1c-afeb-38ae80f28ff3",
+        "userId": "loadtest_user_49"
+      },
+      {
+        "token": "3af36fb4-5365-48cc-98b0-68c78616578a",
+        "userId": "loadtest_user_50"
+      }
+    ]
+  },
+  "root_group": {
+    "path": "",
+    "id": "d41d8cd98f00b204e9800998ecf8427e",
+    "groups": [
+      {
+        "name": "Seat Reservation Flow",
+        "path": "::Seat Reservation Flow",
+        "id": "7195d7edbb5b56ddc3b5135f048587b1",
+        "groups": [],
+        "checks": [
+            {
+              "id": "f2c0d0647af3afee335d8432398f1b16",
+              "passes": 1229,
+              "fails": 0,
+              "name": "seats query success",
+              "path": "::Seat Reservation Flow::seats query success"
+            },
+            {
+              "fails": 0,
+              "name": "status is 201 or 4xx",
+              "path": "::Seat Reservation Flow::status is 201 or 4xx",
+              "id": "af578bece74cdcaab3dd84bcf0a4db22",
+              "passes": 1229
+            },
+            {
+              "passes": 1229,
+              "fails": 0,
+              "name": "no 500 errors",
+              "path": "::Seat Reservation Flow::no 500 errors",
+              "id": "1141e45ee5baa6fe7283ca1822c21693"
+            },
+            {
+              "name": "response has body",
+              "path": "::Seat Reservation Flow::response has body",
+              "id": "25f7c4e5be460bcec53b5882ffe70592",
+              "passes": 1229,
+              "fails": 0
+            }
+          ]
+      }
+    ],
+    "checks": [],
+    "name": ""
+  },
+  "options": {
+    "summaryTrendStats": [
+      "avg",
+      "min",
+      "med",
+      "max",
+      "p(90)",
+      "p(95)"
+    ],
+    "summaryTimeUnit": "",
+    "noColor": false
+  }
+}
