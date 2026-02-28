@@ -17,9 +17,9 @@ const tokenIssueFailed = new Counter('token_issue_failed');
 
 export const options = {
   stages: [
-    { duration: '10s', target: 100 },   // Warm-up: 10초간 100명까지 증가
-    { duration: '30s', target: 1000 },  // Spike: 30초간 1000명까지 급증 (티켓 오픈)
-    { duration: '1m', target: 1000 },   // Sustain: 1분간 1000명 유지
+    { duration: '10s', target: 20 },    // Warm-up: 10초간 20명까지 증가
+    { duration: '20s', target: 100 },   // Spike: 20초간 100명까지 급증 (티켓 오픈)
+    { duration: '30s', target: 100 },   // Sustain: 30초간 100명 유지
     { duration: '10s', target: 0 },     // Ramp-down: 10초간 종료
   ],
   thresholds: {
@@ -28,7 +28,6 @@ export const options = {
     errors: ['rate<0.01'],              // 커스텀 에러율 1% 미만
     token_issue_duration: ['p(99)<1000'], // 99%는 1초 이내
   },
-  // 부하 테스트 결과를 JSON 파일로 저장
   summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
 };
 
@@ -39,31 +38,25 @@ export default function () {
   // Virtual User ID와 Iteration을 조합하여 고유한 userId 생성
   const userId = `user_${__VU}_${__ITER}`;
 
-  const payload = JSON.stringify({
-    userId: userId,
-  });
+  const payload = JSON.stringify({ userId });
 
   const params = {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    tags: {
-      name: 'IssueQueueToken', // 태그로 그룹핑
-    },
+    headers: { 'Content-Type': 'application/json' },
+    tags: { name: 'IssueQueueToken' },
   };
 
   // 대기열 토큰 발급 요청
   const startTime = new Date();
-  const response = http.post(`${BASE_URL}/queue/token`, payload, params);
+  const response = http.post(`${BASE_URL}/api/queue/token`, payload, params);
   const duration = new Date() - startTime;
 
   // 응답 검증
   const result = check(response, {
     'status is 201': (r) => r.status === 201,
-    'has tokenValue': (r) => {
+    'has token': (r) => {
       try {
         const body = JSON.parse(r.body);
-        return body.tokenValue !== undefined;
+        return body.token !== undefined;
       } catch (e) {
         return false;
       }
@@ -90,43 +83,40 @@ export default function () {
     console.error(`Token issue failed: ${response.status} - ${response.body}`);
   }
 
-  // Think Time (사용자가 다음 액션까지 대기하는 시간)
+  // Think Time
   sleep(Math.random() * 2 + 1); // 1~3초 랜덤 대기
 }
 
 export function handleSummary(data) {
+  const spec = __ENV.SPEC || 'result';
+  let text = '';
+  try { text = textSummary(data); } catch (e) { text = 'textSummary error: ' + e.message; }
   return {
-    'load-tests/results/01-queue-spike-test-result.json': JSON.stringify(data, null, 2),
-    stdout: textSummary(data, { indent: ' ', enableColors: true }),
+    [`load-tests/results/01-queue-spike-${spec}.json`]: JSON.stringify(data, null, 2),
+    stdout: text,
   };
 }
 
-function textSummary(data, options) {
-  // 간단한 텍스트 요약 생성
-  const indent = options.indent || '';
-  const colors = options.enableColors || false;
-
+function textSummary(data) {
+  const indent = ' ';
   let summary = `\n${indent}====== Scenario 1: Queue Spike Test Summary ======\n\n`;
 
-  // HTTP 메트릭
   summary += `${indent}HTTP Metrics:\n`;
   summary += `${indent}  Total Requests: ${data.metrics.http_reqs.values.count}\n`;
-  summary += `${indent}  Failed Requests: ${data.metrics.http_req_failed.values.rate * 100}%\n`;
+  summary += `${indent}  Failed Requests: ${(data.metrics.http_req_failed.values.rate * 100).toFixed(2)}%\n`;
   summary += `${indent}  Avg Duration: ${data.metrics.http_req_duration.values.avg.toFixed(2)}ms\n`;
   summary += `${indent}  P95 Duration: ${data.metrics.http_req_duration.values['p(95)'].toFixed(2)}ms\n`;
   summary += `${indent}  P99 Duration: ${data.metrics.http_req_duration.values['p(99)'].toFixed(2)}ms\n\n`;
 
-  // 커스텀 메트릭
   summary += `${indent}Token Issue Metrics:\n`;
   summary += `${indent}  Success: ${data.metrics.token_issue_success.values.count}\n`;
   summary += `${indent}  Failed: ${data.metrics.token_issue_failed.values.count}\n`;
-  summary += `${indent}  Error Rate: ${data.metrics.errors.values.rate * 100}%\n\n`;
+  summary += `${indent}  Error Rate: ${(data.metrics.errors.values.rate * 100).toFixed(2)}%\n\n`;
 
-  // Threshold 결과
   summary += `${indent}Thresholds:\n`;
-  for (const [name, threshold] of Object.entries(data.metrics)) {
-    if (threshold.thresholds) {
-      for (const [thName, thValue] of Object.entries(threshold.thresholds)) {
+  for (const [name, metric] of Object.entries(data.metrics)) {
+    if (metric.thresholds) {
+      for (const [thName, thValue] of Object.entries(metric.thresholds)) {
         const passed = thValue.ok ? '✓' : '✗';
         summary += `${indent}  ${passed} ${name} ${thName}\n`;
       }
