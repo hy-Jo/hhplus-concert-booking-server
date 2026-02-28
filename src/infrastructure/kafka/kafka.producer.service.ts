@@ -72,4 +72,53 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
       ],
     });
   }
+
+  async sendReservationExpirationEvent(event: {
+    reservationId: string;
+    userId: string;
+    seatId: string;
+    expiresAt: Date;
+  }): Promise<void> {
+    const message = {
+      eventId: `evt_${Date.now()}`,
+      eventType: 'reservation.expiration',
+      eventTime: event.expiresAt.toISOString(), // 만료 시간
+      payload: event,
+    };
+
+    await this.send({
+      topic: 'reservation.expiration',
+      messages: [
+        {
+          key: event.reservationId, // 같은 예약은 순서 보장
+          value: JSON.stringify(message),
+        },
+      ],
+    });
+  }
+
+  async sendNotificationRequest(event: {
+    userId: string;
+    type: string;
+    title: string;
+    message: string;
+    data?: Record<string, any>;
+  }): Promise<void> {
+    const message = {
+      eventId: `evt_${Date.now()}`,
+      eventType: 'notification.request',
+      eventTime: new Date().toISOString(),
+      payload: event,
+    };
+
+    await this.send({
+      topic: 'notification.request',
+      messages: [
+        {
+          key: event.userId, // 같은 사용자는 순서 보장
+          value: JSON.stringify(message),
+        },
+      ],
+    });
+  }
 }
